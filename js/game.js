@@ -426,6 +426,9 @@ class PeriodicTableGame {
             return;
         }
         
+        // Hide element info panel for game modes (only show in study mode)
+        this.table.hideElementInfo();
+        
         // Check answer
         let isCorrect = false;
         

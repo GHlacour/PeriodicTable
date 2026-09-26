@@ -350,6 +350,11 @@ body {
     border-radius: var(--border-radius-md);
     box-shadow: var(--shadow-sm);
     min-height: 80px;
+    /* Ensure question area is always visible */
+    position: relative;
+    z-index: var(--z-default);
+    /* Prevent overflow hiding */
+    overflow: visible;
 }
 
 .question {
@@ -357,6 +362,11 @@ body {
     font-weight: var(--font-weight-bold);
     color: var(--color-text);
     margin-bottom: var(--spacing-sm);
+    /* Ensure text doesn't get cut off */
+    white-space: normal;
+    word-wrap: break-word;
+    /* Make sure it's visible on all backgrounds */
+    text-shadow: 0 1px 1px rgba(0,0,0,0.1);
 }
 
 .feedback {
@@ -704,6 +714,16 @@ body {
         max-width: none;
     }
     
+    .question-area {
+        min-height: 100px;
+        padding: var(--spacing-md) var(--spacing-sm);
+    }
+    
+    .question {
+        font-size: var(--font-size-lg);
+        line-height: 1.4;
+    }
+    
     .footer {
         margin-top: var(--spacing-lg);
     }
@@ -730,6 +750,14 @@ body {
     
     .question {
         font-size: var(--font-size-lg);
+        line-height: 1.4;
+        min-height: 2em;
+    }
+    
+    .question-area {
+        min-height: 100px;
+        padding: var(--spacing-md) var(--spacing-sm);
+        margin-bottom: var(--spacing-md);
     }
     
     .periodic-table {
@@ -743,6 +771,12 @@ body {
     
     .modal-content h2 {
         font-size: var(--font-size-xl);
+    }
+    
+    /* Ensure feedback is visible on small screens */
+    .feedback {
+        font-size: var(--font-size-base);
+        min-height: 2em;
     }
 }
 

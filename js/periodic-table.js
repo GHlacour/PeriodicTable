@@ -493,13 +493,15 @@ class PeriodicTable {
         });
     }
     
-    selectElement(symbol) {
+    selectElement(symbol, showInfo = true) {
         this.clearAllHighlights();
         this.selectedElement = symbol;
         const cell = this.highlightElement(symbol, 'selected');
         if (cell) {
             cell.focus();
-            this._showElementInfo(symbol);
+            if (showInfo) {
+                this._showElementInfo(symbol);
+            }
         }
         return cell;
     }
@@ -563,6 +565,14 @@ class PeriodicTable {
                 }
             }
         });
+        
+        // Prevent touch events from bubbling and potentially causing issues
+        this.container.addEventListener('touchstart', (e) => {
+            // Only prevent default if we're handling the click
+            if (e.target.closest('.element-cell')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
         
         // Keyboard navigation
         this.container.addEventListener('keydown', (e) => {

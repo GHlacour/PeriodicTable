@@ -360,6 +360,13 @@ class PeriodicTableGame {
             this.table.clearAllHighlights();
             this.table.hideElementInfo();
             
+            // Ensure question area is visible
+            if (this.questionTextEl) {
+                this.questionTextEl.style.display = 'block';
+                this.questionTextEl.style.visibility = 'visible';
+                this.questionTextEl.style.opacity = '1';
+            }
+            
             // Show timer for timed modes
             if (this._isTimedMode()) {
                 this.timeRemaining = 60;
@@ -653,11 +660,11 @@ class PeriodicTableGame {
             // In study mode, just show info
             if (this.currentMode === 'study') {
                 DEBUG.trace('studyMode.click', { symbol });
-                this.table.selectElement(symbol);
+                this.table.selectElement(symbol, true);
                 return;
             }
             
-            // Hide element info panel for game modes (only show in study mode)
+            // In game modes, don't show info panel - just handle the click
             this.table.hideElementInfo();
             this.table.clearAllHighlights();
             
@@ -1022,12 +1029,20 @@ class PeriodicTableGame {
             // Reset question display
             if (this.questionTextEl) {
                 this.questionTextEl.textContent = '';
+                this.questionTextEl.style.display = '';
+                this.questionTextEl.style.visibility = '';
+                this.questionTextEl.style.opacity = '';
             }
             
             // Hide timer
             if (this.timerContainerEl) {
                 this.timerContainerEl.style.display = 'none';
             }
+        
+        // Ensure element info is hidden
+        if (this.table) {
+            this.table.hideElementInfo();
+        }
             
             // Update debug panel
             DEBUG.updateDebugPanel(this);

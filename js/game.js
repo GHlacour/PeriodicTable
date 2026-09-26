@@ -54,7 +54,10 @@ class PeriodicTableGame {
             this.questionPrefixEl.textContent = this.i18n.translate('question.find', 'Find the element:') + ' ';
         }
         if (this.elementPromptEl && !this.elementPromptEl.textContent.trim()) {
-            this.elementPromptEl.textContent = 'Hydrogen';
+            this.elementPromptEl.textContent = this.i18n.getElementName('H') || 'Hydrogen';
+        }
+        if (this.questionTextEl && !this.questionTextEl.textContent.trim()) {
+            this.questionTextEl.textContent = this.questionPrefixEl.textContent + this.elementPromptEl.textContent;
         }
         this.feedbackTextEl = document.getElementById('feedback-text');
         this.timerContainerEl = document.getElementById('timer-container');
@@ -407,7 +410,8 @@ class PeriodicTableGame {
                     this.elementPromptEl.textContent = '';
                 }
                 if (this.questionTextEl) {
-                    this.questionTextEl.textContent = this.questionPrefixEl.textContent + this.elementPromptEl.textContent;
+                    this.questionTextEl.textContent = (this.questionPrefixEl ? this.questionPrefixEl.textContent : '') + 
+                        (this.elementPromptEl ? this.elementPromptEl.textContent : '');
                 }
                 return;
             default:
@@ -444,9 +448,10 @@ class PeriodicTableGame {
             }
         }
         
-        // Also set the full question text for the parent p element (for accessibility)
+        // Also set the full question text for the parent p element
         if (this.questionTextEl) {
-            this.questionTextEl.textContent = this.questionPrefixEl.textContent + this.elementPromptEl.textContent;
+            this.questionTextEl.textContent = (this.questionPrefixEl ? this.questionPrefixEl.textContent : '') + 
+                (this.elementPromptEl ? this.elementPromptEl.textContent : '');
         }
     }
     

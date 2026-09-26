@@ -30,6 +30,9 @@ class PeriodicTableGame {
         
         // Initialize
         this._initialize();
+        
+        // Set maxAtomicNumber from initial level
+        this.maxAtomicNumber = this.levels[this.currentLevel] || 118;
     }
     
     _initialize() {
@@ -110,9 +113,18 @@ class PeriodicTableGame {
         levelInputs.forEach(input => {
             input.addEventListener('change', (e) => {
                 this.currentLevel = e.target.value;
+                this.maxAtomicNumber = this.levels[this.currentLevel] || 118;
                 this._updateLevelDisplay();
             });
         });
+        
+        // Initialize currentLevel from the checked radio button
+        const checkedLevelInput = document.querySelector('input[name="game-level"]:checked');
+        if (checkedLevelInput) {
+            this.currentLevel = checkedLevelInput.value;
+            this.maxAtomicNumber = this.levels[this.currentLevel] || 118;
+            this._updateLevelDisplay();
+        }
         
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
@@ -216,6 +228,19 @@ class PeriodicTableGame {
     startGame() {
         if (this.gameActive) return;
         
+        // Read current level and mode from UI
+        const checkedLevelInput = document.querySelector('input[name="game-level"]:checked');
+        if (checkedLevelInput) {
+            this.currentLevel = checkedLevelInput.value;
+            this.maxAtomicNumber = this.levels[this.currentLevel] || 118;
+            this._updateLevelDisplay();
+        }
+        const checkedModeInput = document.querySelector('input[name="game-mode"]:checked');
+        if (checkedModeInput) {
+            this.currentMode = checkedModeInput.value;
+            this._updateModeDisplay();
+        }
+        
         this.gameActive = true;
         this.score = 0;
         this.currentQuestion = 0;
@@ -223,8 +248,7 @@ class PeriodicTableGame {
         this.hintsUsed = 0;
         this.gameStartTime = Date.now();
         
-        // Get level max atomic number
-        this.maxAtomicNumber = this.levels[this.currentLevel] || 118;
+
         
         // Update UI
         this._updateScoreDisplay();
@@ -328,7 +352,7 @@ class PeriodicTableGame {
             case 'find-by-group':
                 // Random group from 1-18
                 const group = Math.floor(Math.random() * 18) + 1;
-                element = this.table.getRandomElementFromGroup(group);
+                element = this.table.getRandomElementFromGroup(group, this.maxAtomicNumber);
                 if (!element) {
                     // Fallback to random element
                     element = this._getRandomElement();
@@ -337,7 +361,7 @@ class PeriodicTableGame {
             case 'find-by-period':
                 // Random period from 1-7
                 const period = Math.floor(Math.random() * 7) + 1;
-                element = this.table.getRandomElementFromPeriod(period);
+                element = this.table.getRandomElementFromPeriod(period, this.maxAtomicNumber);
                 if (!element) {
                     // Fallback to random element
                     element = this._getRandomElement();

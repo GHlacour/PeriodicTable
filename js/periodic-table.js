@@ -526,12 +526,12 @@ class PeriodicTable {
         return element || null;
     }
     
-    getElementsByGroup(group) {
-        return PERIODIC_TABLE_DATA.filter(el => el.group === group);
+    getElementsByGroup(group, maxAtomicNumber = 118) {
+        return PERIODIC_TABLE_DATA.filter(el => el.group === group && el.number <= maxAtomicNumber);
     }
     
-    getElementsByPeriod(period) {
-        return PERIODIC_TABLE_DATA.filter(el => el.period === period);
+    getElementsByPeriod(period, maxAtomicNumber = 118) {
+        return PERIODIC_TABLE_DATA.filter(el => el.period === period && el.number <= maxAtomicNumber);
     }
     
     getElementsByBlock(block) {
@@ -547,15 +547,15 @@ class PeriodicTable {
         return PERIODIC_TABLE_DATA[randomIndex];
     }
     
-    getRandomElementFromGroup(group) {
-        const elements = this.getElementsByGroup(group);
+    getRandomElementFromGroup(group, maxAtomicNumber = 118) {
+        const elements = this.getElementsByGroup(group, maxAtomicNumber);
         if (elements.length === 0) return null;
         const randomIndex = Math.floor(Math.random() * elements.length);
         return elements[randomIndex];
     }
     
-    getRandomElementFromPeriod(period) {
-        const elements = this.getElementsByPeriod(period);
+    getRandomElementFromPeriod(period, maxAtomicNumber = 118) {
+        const elements = this.getElementsByPeriod(period, maxAtomicNumber);
         if (elements.length === 0) return null;
         const randomIndex = Math.floor(Math.random() * elements.length);
         return elements[randomIndex];

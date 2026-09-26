@@ -501,7 +501,6 @@ class PeriodicTable {
                 if (this.onElementClick) {
                     this.onElementClick(symbol, this.elements[symbol]);
                 }
-                this.selectElement(symbol);
             }
         });
         

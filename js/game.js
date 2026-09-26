@@ -428,6 +428,7 @@ class PeriodicTableGame {
         
         // Hide element info panel for game modes (only show in study mode)
         this.table.hideElementInfo();
+        this.table.clearAllHighlights();
         
         // Check answer
         let isCorrect = false;

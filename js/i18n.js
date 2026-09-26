@@ -122,6 +122,16 @@ class I18n {
         
         // Update specific known elements
         this._updateKnownElements();
+        
+        // Update level display if it exists
+        const levelValue = document.getElementById('level-value');
+        if (levelValue) {
+            levelValue.textContent = this.translate('level.all', 'All Elements (1-118)');
+        }
+        const levelLabel = document.getElementById('level-label');
+        if (levelLabel) {
+            levelLabel.textContent = this.translate('level.label', 'Level:') + ' ';
+        }
     }
     
     _updateKnownElements() {

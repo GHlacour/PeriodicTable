@@ -34,6 +34,10 @@
                 <span id="mode-label">Mode:</span>
                 <span id="mode-value">Find by Name</span>
             </div>
+            <div class="level-display">
+                <span id="level-label">Level:</span>
+                <span id="level-value">All Elements</span>
+            </div>
             <div class="timer-display" id="timer-container" style="display: none;">
                 <span id="timer-label">Time:</span>
                 <span id="timer-value">60</span>
@@ -84,9 +88,44 @@
             </div>
         </div>
 
+        <!-- Level Selection -->
+        <div class="level-selection" role="region">
+            <h2 id="select-level-title">Select Level</h2>
+            <div class="level-options">
+                <label class="level-option">
+                    <input type="radio" name="game-level" value="all" checked>
+                    <span id="level-all-text">All Elements (1-118)</span>
+                </label>
+                <label class="level-option">
+                    <input type="radio" name="game-level" value="neon">
+                    <span id="level-neon-text">Up to Neon (1-10)</span>
+                </label>
+                <label class="level-option">
+                    <input type="radio" name="game-level" value="argon">
+                    <span id="level-argon-text">Up to Argon (1-18)</span>
+                </label>
+                <label class="level-option">
+                    <input type="radio" name="game-level" value="krypton">
+                    <span id="level-krypton-text">Up to Krypton (1-36)</span>
+                </label>
+                <label class="level-option">
+                    <input type="radio" name="game-level" value="xenon">
+                    <span id="level-xenon-text">Up to Xenon (1-54)</span>
+                </label>
+                <label class="level-option">
+                    <input type="radio" name="game-level" value="radon">
+                    <span id="level-radon-text">Up to Radon (1-86)</span>
+                </label>
+                <label class="level-option">
+                    <input type="radio" name="game-level" value="oganesson">
+                    <span id="level-oganesson-text">Up to Oganesson (1-118)</span>
+                </label>
+            </div>
+        </div>
+
         <!-- Question Display -->
         <div class="question-area" role="region" aria-live="assertive">
-            <p id="question-text" class="question">Find the element: <span id="element-prompt">Hydrogen</span></p>
+            <p id="question-text" class="question"></p>
             <p id="feedback-text" class="feedback" aria-live="polite"></p>
         </div>
 

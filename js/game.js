@@ -9,12 +9,24 @@ class PeriodicTableGame {
         this.currentQuestion = 0;
         this.currentElement = null;
         this.currentMode = 'find-by-name';
+        this.currentLevel = 'all';
         this.gameActive = false;
         this.timer = null;
         this.timeRemaining = 60;
         this.usedElements = new Set();
         this.gameStartTime = null;
         this.hintsUsed = 0;
+        
+        // Define level boundaries (atomic numbers)
+        this.levels = {
+            'neon': 10,      // Up to Neon (10)
+            'argon': 18,     // Up to Argon (18)
+            'krypton': 36,   // Up to Krypton (36)
+            'xenon': 54,     // Up to Xenon (54)
+            'radon': 86,     // Up to Radon (86)
+            'oganesson': 118, // Up to Oganesson (118)
+            'all': 118       // All elements
+        };
         
         // Initialize
         this._initialize();
@@ -28,6 +40,8 @@ class PeriodicTableGame {
         this.scoreValueEl = document.getElementById('score-value');
         this.totalQuestionsEl = document.getElementById('total-questions');
         this.modeValueEl = document.getElementById('mode-value');
+        this.levelValueEl = document.getElementById('level-value');
+        this.levelLabelEl = document.getElementById('level-label');
         this.questionTextEl = document.getElementById('question-text');
         this.elementPromptEl = document.getElementById('element-prompt');
         this.feedbackTextEl = document.getElementById('feedback-text');
@@ -46,8 +60,9 @@ class PeriodicTableGame {
         // Set up event listeners
         this._setupEventListeners();
         
-        // Update mode display
+        // Update mode and level displays
         this._updateModeDisplay();
+        this._updateLevelDisplay();
         
         // Hide timer initially
         if (this.timerContainerEl) {
@@ -87,6 +102,15 @@ class PeriodicTableGame {
             input.addEventListener('change', (e) => {
                 this.currentMode = e.target.value;
                 this._updateModeDisplay();
+            });
+        });
+        
+        // Level selection
+        const levelInputs = document.querySelectorAll('input[name="game-level"]');
+        levelInputs.forEach(input => {
+            input.addEventListener('change', (e) => {
+                this.currentLevel = e.target.value;
+                this._updateLevelDisplay();
             });
         });
         
@@ -174,6 +198,21 @@ class PeriodicTableGame {
         }
     }
     
+    _updateLevelDisplay() {
+        if (this.levelValueEl) {
+            const levelNames = {
+                'neon': this.i18n.translate('level.neon', 'Up to Neon (1-10)'),
+                'argon': this.i18n.translate('level.argon', 'Up to Argon (1-18)'),
+                'krypton': this.i18n.translate('level.krypton', 'Up to Krypton (1-36)'),
+                'xenon': this.i18n.translate('level.xenon', 'Up to Xenon (1-54)'),
+                'radon': this.i18n.translate('level.radon', 'Up to Radon (1-86)'),
+                'oganesson': this.i18n.translate('level.oganesson', 'Up to Oganesson (1-118)'),
+                'all': this.i18n.translate('level.all', 'All Elements (1-118)')
+            };
+            this.levelValueEl.textContent = levelNames[this.currentLevel] || this.currentLevel;
+        }
+    }
+    
     startGame() {
         if (this.gameActive) return;
         
@@ -183,6 +222,9 @@ class PeriodicTableGame {
         this.usedElements = new Set();
         this.hintsUsed = 0;
         this.gameStartTime = Date.now();
+        
+        // Get level max atomic number
+        this.maxAtomicNumber = this.levels[this.currentLevel] || 118;
         
         // Update UI
         this._updateScoreDisplay();
@@ -347,9 +389,10 @@ class PeriodicTableGame {
     }
     
     _getRandomElement() {
-        // Try to get an element not used yet
+        // Try to get an element not used yet, filtered by level
         const allElements = window.PERIODIC_TABLE_DATA || [];
-        const unusedElements = allElements.filter(el => !this.usedElements.has(el.symbol));
+        const levelElements = allElements.filter(el => el.number <= this.maxAtomicNumber);
+        const unusedElements = levelElements.filter(el => !this.usedElements.has(el.symbol));
         
         if (unusedElements.length > 0) {
             const randomIndex = Math.floor(Math.random() * unusedElements.length);
@@ -358,10 +401,10 @@ class PeriodicTableGame {
             return element;
         }
         
-        // If all elements used, reset and pick random
+        // If all elements used for this level, reset and pick random from level
         this.usedElements.clear();
-        const randomIndex = Math.floor(Math.random() * allElements.length);
-        const element = allElements[randomIndex];
+        const randomIndex = Math.floor(Math.random() * levelElements.length);
+        const element = levelElements[randomIndex];
         this.usedElements.add(element.symbol);
         return element;
     }

@@ -15,18 +15,18 @@
     --color-border: #bdc3c7;
     --color-hover: #2980b9;
     
-    /* Periodic Table Colors */
-    --color-alkali: #ff6b6b;
-    --color-alkaline-earth: #feca57;
-    --color-lanthanide: #ff9ff3;
-    --color-actinide: #f368e0;
-    --color-transition: #48dbfb;
-    --color-post-transition: #48dbfb;
-    --color-metalloid: #54a0ff;
-    --color-nonmetal: #5f27cd;
-    --color-halogen: #0abde3;
-    --color-noble-gas: #10ac84;
-    --color-unknown: #95a5a6;
+    /* Periodic Table Colors - Lightened for better text contrast */
+    --color-alkali: #ff9999;
+    --color-alkaline-earth: #ffdd88;
+    --color-lanthanide: #ffb3f0;
+    --color-actinide: #f5a0e0;
+    --color-transition: #88d8f8;
+    --color-post-transition: #88d8f8;
+    --color-metalloid: #99c2ff;
+    --color-nonmetal: #8a63d8;
+    --color-halogen: #4ac8e8;
+    --color-noble-gas: #48ca9e;
+    --color-unknown: #c0c0c0;
     
     /* Spacing */
     --spacing-xs: 0.25rem;
@@ -413,6 +413,7 @@ body {
     cursor: pointer;
     transition: all var(--transition-fast);
     overflow: hidden;
+    color: var(--color-text);
 }
 
 .element-cell:hover {
@@ -432,7 +433,8 @@ body {
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-bold);
     color: var(--color-text);
-    text-transform: uppercase;
+    /* Remove uppercase transform for chemically correct symbols */
+    text-transform: none;
 }
 
 .element-cell .number {

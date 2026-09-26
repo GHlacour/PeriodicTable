@@ -477,6 +477,12 @@ class PeriodicTable {
         
         // Position and show panel
         infoPanel.style.display = 'block';
+        
+        // Add close button handler
+        const closeBtn = document.getElementById('close-info-btn');
+        if (closeBtn) {
+            closeBtn.onclick = () => this.hideElementInfo();
+        }
     }
     
     hideElementInfo() {

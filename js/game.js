@@ -111,7 +111,10 @@ class PeriodicTableGame {
         
         // Play again button
         if (this.playAgainBtn) {
-            this.playAgainBtn.addEventListener('click', () => this.resetGame());
+            this.playAgainBtn.addEventListener('click', () => {
+                this.resetGame();
+                this.startGame();
+            });
         }
         
         // Mode selection

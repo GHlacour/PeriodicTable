@@ -48,6 +48,14 @@ class PeriodicTableGame {
         this.questionTextEl = document.getElementById('question-text');
         this.questionPrefixEl = document.getElementById('question-prefix');
         this.elementPromptEl = document.getElementById('element-prompt');
+        
+        // Initialize question display with default values
+        if (this.questionPrefixEl && !this.questionPrefixEl.textContent.trim()) {
+            this.questionPrefixEl.textContent = this.i18n.translate('question.find', 'Find the element:') + ' ';
+        }
+        if (this.elementPromptEl && !this.elementPromptEl.textContent.trim()) {
+            this.elementPromptEl.textContent = 'Hydrogen';
+        }
         this.feedbackTextEl = document.getElementById('feedback-text');
         this.timerContainerEl = document.getElementById('timer-container');
         this.timerValueEl = document.getElementById('timer-value');
@@ -119,12 +127,28 @@ class PeriodicTableGame {
             });
         });
         
+        // Mode selection - also clear question when mode changes
+        const modeInputs = document.querySelectorAll('input[name="game-mode"]');
+        modeInputs.forEach(input => {
+            input.addEventListener('change', (e) => {
+                this.currentMode = e.target.value;
+                this._updateModeDisplay();
+            });
+        });
+        
         // Initialize currentLevel from the checked radio button
         const checkedLevelInput = document.querySelector('input[name="game-level"]:checked');
         if (checkedLevelInput) {
             this.currentLevel = checkedLevelInput.value;
             this.maxAtomicNumber = this.levels[this.currentLevel] || 118;
             this._updateLevelDisplay();
+        }
+        
+        // Initialize currentMode from the checked radio button
+        const checkedModeInput = document.querySelector('input[name="game-mode"]:checked');
+        if (checkedModeInput) {
+            this.currentMode = checkedModeInput.value;
+            this._updateModeDisplay();
         }
         
         // Keyboard shortcuts
@@ -225,6 +249,10 @@ class PeriodicTableGame {
             };
             this.levelValueEl.textContent = levelNames[this.currentLevel] || this.currentLevel;
         }
+        
+        // Clear question display when level changes
+        if (this.questionPrefixEl) this.questionPrefixEl.textContent = '';
+        if (this.elementPromptEl) this.elementPromptEl.textContent = '';
     }
     
     startGame() {
@@ -378,6 +406,9 @@ class PeriodicTableGame {
                 if (this.elementPromptEl) {
                     this.elementPromptEl.textContent = '';
                 }
+                if (this.questionTextEl) {
+                    this.questionTextEl.textContent = this.questionPrefixEl.textContent + this.elementPromptEl.textContent;
+                }
                 return;
             default:
                 element = this._getRandomElement();
@@ -411,6 +442,11 @@ class PeriodicTableGame {
                     this.elementPromptEl.textContent = element.period.toString();
                     break;
             }
+        }
+        
+        // Also set the full question text for the parent p element (for accessibility)
+        if (this.questionTextEl) {
+            this.questionTextEl.textContent = this.questionPrefixEl.textContent + this.elementPromptEl.textContent;
         }
     }
     
@@ -575,8 +611,6 @@ class PeriodicTableGame {
         this.table.clearAllHighlights();
         this.table.hideElementInfo();
         
-        // Don't increment question if we're just clearing to show the question
-        // The question is shown when game starts, so next should go to next question
         this.currentQuestion++;
         this._askQuestion();
     }
@@ -662,6 +696,9 @@ class PeriodicTableGame {
         }
         if (this.elementPromptEl) {
             this.elementPromptEl.textContent = '';
+        }
+        if (this.questionTextEl) {
+            this.questionTextEl.textContent = '';
         }
         
         // Hide timer

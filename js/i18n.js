@@ -1,7 +1,18 @@
 // ===== Internationalization (i18n) System =====
 
+// Debug helper - will be available if debug.js is loaded
+const I18N_DEBUG = window.debugGame || {
+    log: () => {},
+    info: () => {},
+    warn: () => {},
+    error: () => {},
+    debug: () => {}
+};
+
 class I18n {
     constructor() {
+        I18N_DEBUG.info('I18n constructor called', null, 'i18n');
+        
         this.currentLanguage = 'en';
         this.translations = {};
         this.elementNames = {};
@@ -9,19 +20,31 @@ class I18n {
     }
     
     async _loadTranslations() {
+        I18N_DEBUG.info('Loading translations...', null, 'i18n');
+        
         // Try to load translations for all available languages
         const languages = ['en', 'nl', 'da'];
         
         for (const lang of languages) {
             try {
+                I18N_DEBUG.trace(`Loading translation: ${lang}`, null, 'i18n');
                 const response = await fetch(`lang/${lang}.json`);
                 if (response.ok) {
                     const data = await response.json();
                     this.translations[lang] = data.translations || {};
                     this.elementNames[lang] = data.elementNames || {};
+                    I18N_DEBUG.info(`Loaded translations for ${lang}`, {
+                        translationCount: Object.keys(this.translations[lang]).length,
+                        elementNamesCount: Object.keys(this.elementNames[lang]).length
+                    }, 'i18n');
+                } else {
+                    I18N_DEBUG.warn(`Failed to load ${lang}.json: HTTP ${response.status}`, null, 'i18n');
+                    // Fall back to empty object
+                    this.translations[lang] = {};
+                    this.elementNames[lang] = {};
                 }
             } catch (error) {
-                console.warn(`Failed to load translations for ${lang}:`, error);
+                I18N_DEBUG.error(`Failed to load translations for ${lang}`, error, 'i18n');
                 // Fall back to empty object
                 this.translations[lang] = {};
                 this.elementNames[lang] = {};
@@ -29,31 +52,41 @@ class I18n {
         }
         
         // Set default language
+        I18N_DEBUG.trace('Setting default language', { lang: this.currentLanguage }, 'i18n');
         this.setLanguage(this.currentLanguage);
     }
     
     setLanguage(languageCode) {
-        // Validate language code
-        if (!this.translations[languageCode]) {
-            console.warn(`Language ${languageCode} not available, falling back to English`);
-            languageCode = 'en';
+        I18N_DEBUG.trace('setLanguage', { languageCode }, 'i18n');
+        
+        try {
+            // Validate language code
+            if (!this.translations[languageCode]) {
+                I18N_DEBUG.warn(`Language ${languageCode} not available, falling back to English`, null, 'i18n');
+                languageCode = 'en';
+            }
+            
+            this.currentLanguage = languageCode;
+            
+            // Update document language
+            document.documentElement.lang = languageCode;
+            
+            // Update all translatable elements
+            this.updateAllTranslations();
+            
+            // Save preference
+            localStorage.setItem('periodicTableLanguage', languageCode);
+            
+            // Dispatch event for other components to react
+            window.dispatchEvent(new CustomEvent('languageChanged', {
+                detail: { language: languageCode }
+            }));
+            
+            I18N_DEBUG.info(`Language set to: ${languageCode}`, null, 'i18n');
+            
+        } catch (error) {
+            I18N_DEBUG.error('Error in setLanguage', error, 'i18n');
         }
-        
-        this.currentLanguage = languageCode;
-        
-        // Update document language
-        document.documentElement.lang = languageCode;
-        
-        // Update all translatable elements
-        this.updateAllTranslations();
-        
-        // Save preference
-        localStorage.setItem('periodicTableLanguage', languageCode);
-        
-        // Dispatch event for other components to react
-        window.dispatchEvent(new CustomEvent('languageChanged', {
-            detail: { language: languageCode }
-        }));
     }
     
     getLanguage() {
@@ -318,30 +351,43 @@ window.I18n = new I18n();
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', async () => {
-    await window.I18n.initialize();
+    I18N_DEBUG.info('DOMContentLoaded, initializing i18n...', null, 'i18n');
     
-    // Set up language selector
-    const langSelector = document.getElementById('language');
-    if (langSelector) {
-        langSelector.addEventListener('change', (e) => {
-            window.I18n.setLanguage(e.target.value);
-        });
-    }
-    
-    // Set up keyboard shortcut for language change
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'l' || e.key === 'L') {
-            // Cycle through languages
-            const languages = ['en', 'nl', 'da'];
-            const currentIndex = languages.indexOf(window.I18n.getLanguage());
-            const nextIndex = (currentIndex + 1) % languages.length;
-            window.I18n.setLanguage(languages[nextIndex]);
-            
-            // Update selector
-            const langSelector = document.getElementById('language');
-            if (langSelector) {
-                langSelector.value = languages[nextIndex];
-            }
+    try {
+        await window.I18n.initialize();
+        I18N_DEBUG.info('I18n initialized successfully', null, 'i18n');
+        
+        // Set up language selector
+        const langSelector = document.getElementById('language');
+        if (langSelector) {
+            langSelector.addEventListener('change', (e) => {
+                I18N_DEBUG.trace('languageSelector.change', { value: e.target.value }, 'i18n');
+                window.I18n.setLanguage(e.target.value);
+            });
+        } else {
+            I18N_DEBUG.warn('Language selector not found', null, 'i18n');
         }
-    });
+        
+        // Set up keyboard shortcut for language change
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'l' || e.key === 'L') {
+                I18N_DEBUG.trace('keyboard.languageChange', null, 'i18n');
+                // Cycle through languages
+                const languages = ['en', 'nl', 'da'];
+                const currentIndex = languages.indexOf(window.I18n.getLanguage());
+                const nextIndex = (currentIndex + 1) % languages.length;
+                window.I18n.setLanguage(languages[nextIndex]);
+                
+                // Update selector
+                const langSelector = document.getElementById('language');
+                if (langSelector) {
+                    langSelector.value = languages[nextIndex];
+                }
+            }
+        });
+        
+    } catch (error) {
+        I18N_DEBUG.error('Failed to initialize i18n', error, 'i18n');
+        console.error('Failed to initialize i18n:', error);
+    }
 });

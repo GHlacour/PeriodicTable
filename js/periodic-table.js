@@ -1,5 +1,15 @@
 // ===== Periodic Table Data =====
 
+// Debug helper - will be available if debug.js is loaded
+const PT_DEBUG = window.debugGame || {
+    log: () => {},
+    info: () => {},
+    warn: () => {},
+    error: () => {},
+    debug: () => {},
+    trace: () => {}
+};
+
 // Complete periodic table data with all 118 elements
 const PERIODIC_TABLE_DATA = [
     // Atomic number, Symbol, Name (English), Category, Group, Period, Block, x, y
@@ -176,39 +186,89 @@ const CATEGORY_NAMES = {
 
 class PeriodicTable {
     constructor(containerId, onElementClick = null) {
+        PT_DEBUG.info('PeriodicTable constructor called', { containerId }, 'pt');
+        
         this.container = document.getElementById(containerId);
         this.onElementClick = onElementClick;
         this.elements = {};
         this.grid = [];
         this.selectedElement = null;
         
+        // Validate container
+        if (!this.container) {
+            PT_DEBUG.error(`Container element not found: ${containerId}`, null, 'pt');
+            throw new Error(`Container element not found: ${containerId}`);
+        }
+        
         // Initialize data structures
+        PT_DEBUG.trace('initializeData', null, 'pt');
         this._initializeData();
+        
+        PT_DEBUG.trace('createGrid', null, 'pt');
         this._createGrid();
+        
+        PT_DEBUG.trace('render', null, 'pt');
         this.render();
+        
+        PT_DEBUG.trace('setupEventListeners', null, 'pt');
         this._setupEventListeners();
+        
+        PT_DEBUG.info('PeriodicTable initialized successfully', {
+            elementCount: Object.keys(this.elements).length
+        }, 'pt');
     }
     
     _initializeData() {
-        // Index elements by symbol for quick lookup
-        PERIODIC_TABLE_DATA.forEach(element => {
-            this.elements[element.symbol] = element;
-        });
+        PT_DEBUG.trace('initializeData', null, 'pt');
         
-        // Create 2D grid (18 columns x 10 rows)
-        for (let y = 0; y < 10; y++) {
-            this.grid[y] = [];
-            for (let x = 0; x < 18; x++) {
-                this.grid[y][x] = null;
+        try {
+            // Validate data exists
+            if (!PERIODIC_TABLE_DATA || PERIODIC_TABLE_DATA.length === 0) {
+                PT_DEBUG.error('PERIODIC_TABLE_DATA is empty or undefined', null, 'pt');
+                throw new Error('PERIODIC_TABLE_DATA is not available');
             }
+            
+            PT_DEBUG.info(`Indexing ${PERIODIC_TABLE_DATA.length} elements`, null, 'pt');
+            
+            // Index elements by symbol for quick lookup
+            PERIODIC_TABLE_DATA.forEach(element => {
+                if (!element || !element.symbol) {
+                    PT_DEBUG.warn('Invalid element in data', { element }, 'pt');
+                    return;
+                }
+                this.elements[element.symbol] = element;
+            });
+            
+            PT_DEBUG.info(`Indexed ${Object.keys(this.elements).length} elements by symbol`, null, 'pt');
+            
+            // Create 2D grid (18 columns x 10 rows)
+            for (let y = 0; y < 10; y++) {
+                this.grid[y] = [];
+                for (let x = 0; x < 18; x++) {
+                    this.grid[y][x] = null;
+                }
+            }
+            
+            // Place elements in grid
+            let placedCount = 0;
+            PERIODIC_TABLE_DATA.forEach(element => {
+                if (element.x >= 0 && element.x < 18 && element.y >= 0 && element.y < 10) {
+                    this.grid[element.y][element.x] = element;
+                    placedCount++;
+                } else {
+                    PT_DEBUG.warn(`Element ${element.symbol} has invalid grid position`, {
+                        x: element.x,
+                        y: element.y
+                    }, 'pt');
+                }
+            });
+            
+            PT_DEBUG.info(`Placed ${placedCount} elements in grid`, null, 'pt');
+            
+        } catch (error) {
+            PT_DEBUG.error('Error in _initializeData', error, 'pt');
+            throw error;
         }
-        
-        // Place elements in grid
-        PERIODIC_TABLE_DATA.forEach(element => {
-            if (element.x >= 0 && element.x < 18 && element.y >= 0 && element.y < 10) {
-                this.grid[element.y][element.x] = element;
-            }
-        });
     }
     
     _createGrid() {

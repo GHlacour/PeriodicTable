@@ -1,7 +1,23 @@
 // ===== Game Logic =====
 
+// Debug helper - will be available if debug.js is loaded
+const DEBUG = window.debugGame || {
+    log: () => {},
+    info: () => {},
+    warn: () => {},
+    error: () => {},
+    debug: () => {},
+    trace: () => {},
+    recordState: () => {},
+    validateGameState: () => true,
+    assert: () => {},
+    updateDebugPanel: () => {}
+};
+
 class PeriodicTableGame {
     constructor() {
+        DEBUG.info('PeriodicTableGame constructor called', null, 'game');
+        
         this.table = null;
         this.i18n = window.I18n || new I18n();
         this.score = 0;
@@ -16,6 +32,18 @@ class PeriodicTableGame {
         this.usedElements = new Set();
         this.gameStartTime = null;
         this.hintsUsed = 0;
+        this.maxAtomicNumber = 118;
+        
+        DEBUG.recordState('game.constructor', {
+            score: this.score,
+            totalQuestions: this.totalQuestions,
+            mode: this.currentMode,
+            level: this.currentLevel
+        });
+        
+        // Validate initialization
+        DEBUG.assert(this.i18n, 'I18n not initialized');
+        DEBUG.assert(this.totalQuestions > 0, 'totalQuestions must be positive');
         
         // Define level boundaries (atomic numbers)
         this.levels = {
@@ -33,157 +61,228 @@ class PeriodicTableGame {
     }
     
     _initialize() {
-        // Create periodic table
-        this.table = new PeriodicTable('periodic-table', this._handleElementClick.bind(this));
+        DEBUG.info('Initializing game...', null, 'game');
         
-        // Set up UI references
-        this.scoreValueEl = document.getElementById('score-value');
-        this.totalQuestionsEl = document.getElementById('total-questions');
-        this.modeValueEl = document.getElementById('mode-value');
-        this.levelValueEl = document.getElementById('level-value');
-        this.levelLabelEl = document.getElementById('level-label');
-        this.questionTextEl = document.getElementById('question-text');
-        this.elementPromptEl = document.getElementById('element-prompt');
-        this.feedbackTextEl = document.getElementById('feedback-text');
-        this.timerContainerEl = document.getElementById('timer-container');
-        this.timerValueEl = document.getElementById('timer-value');
-        this.startBtn = document.getElementById('start-btn');
-        this.nextBtn = document.getElementById('next-btn');
-        this.hintBtn = document.getElementById('hint-btn');
-        this.resetBtn = document.getElementById('reset-btn');
-        this.gameOverModal = document.getElementById('game-over-modal');
-        this.finalScoreEl = document.getElementById('final-score');
-        this.finalTotalEl = document.getElementById('final-total');
-        this.performanceTextEl = document.getElementById('performance-text');
-        this.playAgainBtn = document.getElementById('play-again-btn');
-        
-        // Set up event listeners
-        this._setupEventListeners();
-        
-        // Update mode and level displays
-        this._updateModeDisplay();
-        this._updateLevelDisplay();
-        
-        // Hide timer initially
-        if (this.timerContainerEl) {
-            this.timerContainerEl.style.display = 'none';
+        try {
+            // Create periodic table
+            DEBUG.trace('create.periodicTable');
+            this.table = new PeriodicTable('periodic-table', this._handleElementClick.bind(this));
+            DEBUG.assert(this.table, 'PeriodicTable not created');
+            
+            // Set up UI references
+            DEBUG.trace('setup.uiReferences');
+            this.scoreValueEl = document.getElementById('score-value');
+            this.totalQuestionsEl = document.getElementById('total-questions');
+            this.modeValueEl = document.getElementById('mode-value');
+            this.levelValueEl = document.getElementById('level-value');
+            this.levelLabelEl = document.getElementById('level-label');
+            this.questionTextEl = document.getElementById('question-text');
+            this.elementPromptEl = document.getElementById('element-prompt');
+            this.feedbackTextEl = document.getElementById('feedback-text');
+            this.timerContainerEl = document.getElementById('timer-container');
+            this.timerValueEl = document.getElementById('timer-value');
+            this.startBtn = document.getElementById('start-btn');
+            this.nextBtn = document.getElementById('next-btn');
+            this.hintBtn = document.getElementById('hint-btn');
+            this.resetBtn = document.getElementById('reset-btn');
+            this.gameOverModal = document.getElementById('game-over-modal');
+            this.finalScoreEl = document.getElementById('final-score');
+            this.finalTotalEl = document.getElementById('final-total');
+            this.performanceTextEl = document.getElementById('performance-text');
+            this.playAgainBtn = document.getElementById('play-again-btn');
+            
+            // Validate critical UI elements
+            DEBUG.assert(this.scoreValueEl, 'scoreValueEl not found');
+            DEBUG.assert(this.questionTextEl, 'questionTextEl not found');
+            DEBUG.assert(this.startBtn, 'startBtn not found');
+            
+            // Set up event listeners
+            DEBUG.trace('setup.eventListeners');
+            this._setupEventListeners();
+            
+            // Update mode and level displays
+            DEBUG.trace('update.displays');
+            this._updateModeDisplay();
+            this._updateLevelDisplay();
+            
+            // Hide timer initially
+            if (this.timerContainerEl) {
+                this.timerContainerEl.style.display = 'none';
+            }
+            
+            // Initialize level and mode from UI
+            DEBUG.trace('initialize.fromUI');
+            this._initializeFromUI();
+            
+            DEBUG.recordState('game.initialized', {
+                mode: this.currentMode,
+                level: this.currentLevel,
+                maxAtomicNumber: this.maxAtomicNumber
+            });
+            
+        } catch (error) {
+            DEBUG.error('Initialization error', error, 'game');
+            throw error;
         }
-        
-        // Initialize level and mode from UI
-        this._initializeFromUI();
     }
     
     _initializeFromUI() {
-        const checkedLevelInput = document.querySelector('input[name="game-level"]:checked');
-        if (checkedLevelInput) {
-            this.currentLevel = checkedLevelInput.value;
-            this.maxAtomicNumber = this.levels[this.currentLevel] || 118;
-        } else {
-            this.maxAtomicNumber = 118;
-        }
+        DEBUG.trace('initializeFromUI');
         
-        const checkedModeInput = document.querySelector('input[name="game-mode"]:checked');
-        if (checkedModeInput) {
-            this.currentMode = checkedModeInput.value;
+        try {
+            const checkedLevelInput = document.querySelector('input[name="game-level"]:checked');
+            if (checkedLevelInput) {
+                this.currentLevel = checkedLevelInput.value;
+                this.maxAtomicNumber = this.levels[this.currentLevel] || 118;
+                DEBUG.info(`Level set to: ${this.currentLevel} (max: ${this.maxAtomicNumber})`, null, 'game');
+            } else {
+                DEBUG.warn('No level input checked, using default (all)', null, 'game');
+                this.maxAtomicNumber = 118;
+            }
+            
+            const checkedModeInput = document.querySelector('input[name="game-mode"]:checked');
+            if (checkedModeInput) {
+                this.currentMode = checkedModeInput.value;
+                DEBUG.info(`Mode set to: ${this.currentMode}`, null, 'game');
+            } else {
+                DEBUG.warn('No mode input checked, using default (find-by-name)', null, 'game');
+            }
+            
+            // Validate settings
+            DEBUG.assert(this.maxAtomicNumber >= 1 && this.maxAtomicNumber <= 118, 
+                `Invalid maxAtomicNumber: ${this.maxAtomicNumber}`);
+            
+        } catch (error) {
+            DEBUG.error('Error in _initializeFromUI', error, 'game');
         }
     }
     
     _setupEventListeners() {
-        // Start button
-        if (this.startBtn) {
-            this.startBtn.addEventListener('click', () => this.startGame());
-        }
+        DEBUG.trace('setupEventListeners');
         
-        // Next button
-        if (this.nextBtn) {
-            this.nextBtn.addEventListener('click', () => this.nextQuestion());
-        }
-        
-        // Hint button
-        if (this.hintBtn) {
-            this.hintBtn.addEventListener('click', () => this.showHint());
-        }
-        
-        // Reset button
-        if (this.resetBtn) {
-            this.resetBtn.addEventListener('click', () => this.resetGame());
-        }
-        
-        // Play again button
-        if (this.playAgainBtn) {
-            this.playAgainBtn.addEventListener('click', () => {
-                this.resetGame();
-                this.startGame();
-            });
-        }
-        
-        // Mode selection
-        const modeInputs = document.querySelectorAll('input[name="game-mode"]');
-        modeInputs.forEach(input => {
-            input.addEventListener('change', (e) => {
-                this.currentMode = e.target.value;
-                this._updateModeDisplay();
-            });
-        });
-        
-        // Level selection
-        const levelInputs = document.querySelectorAll('input[name="game-level"]');
-        levelInputs.forEach(input => {
-            input.addEventListener('change', (e) => {
-                this.currentLevel = e.target.value;
-                this.maxAtomicNumber = this.levels[this.currentLevel] || 118;
-                this._updateLevelDisplay();
-            });
-        });
-        
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-                return;
+        try {
+            // Start button
+            if (this.startBtn) {
+                this.startBtn.addEventListener('click', () => {
+                    DEBUG.trace('click.startBtn');
+                    this.startGame();
+                });
             }
             
-            switch (e.key) {
-                case 's':
-                case 'S':
-                    if (!this.gameActive) {
-                        this.startGame();
-                    }
-                    break;
-                case 'n':
-                case 'N':
-                case ' ':
-                    if (this.gameActive && !e.repeat) {
-                        this.nextQuestion();
-                        e.preventDefault();
-                    }
-                    break;
-                case 'h':
-                case 'H':
-                    if (this.gameActive && !e.repeat) {
-                        this.showHint();
-                        e.preventDefault();
-                    }
-                    break;
-                case 'r':
-                case 'R':
+            // Next button
+            if (this.nextBtn) {
+                this.nextBtn.addEventListener('click', () => {
+                    DEBUG.trace('click.nextBtn');
+                    this.nextQuestion();
+                });
+            }
+            
+            // Hint button
+            if (this.hintBtn) {
+                this.hintBtn.addEventListener('click', () => {
+                    DEBUG.trace('click.hintBtn');
+                    this.showHint();
+                });
+            }
+            
+            // Reset button
+            if (this.resetBtn) {
+                this.resetBtn.addEventListener('click', () => {
+                    DEBUG.trace('click.resetBtn');
                     this.resetGame();
-                    break;
-                case 'Escape':
-                    if (this.gameActive) {
+                });
+            }
+            
+            // Play again button
+            if (this.playAgainBtn) {
+                this.playAgainBtn.addEventListener('click', () => {
+                    DEBUG.trace('click.playAgainBtn');
+                    this.resetGame();
+                    this.startGame();
+                });
+            }
+            
+            // Mode selection
+            const modeInputs = document.querySelectorAll('input[name="game-mode"]');
+            modeInputs.forEach(input => {
+                input.addEventListener('change', (e) => {
+                    DEBUG.trace('change.modeInput');
+                    this.currentMode = e.target.value;
+                    this._updateModeDisplay();
+                });
+            });
+            
+            // Level selection
+            const levelInputs = document.querySelectorAll('input[name="game-level"]');
+            levelInputs.forEach(input => {
+                input.addEventListener('change', (e) => {
+                    DEBUG.trace('change.levelInput');
+                    this.currentLevel = e.target.value;
+                    this.maxAtomicNumber = this.levels[this.currentLevel] || 118;
+                    this._updateLevelDisplay();
+                });
+            });
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                    return;
+                }
+                
+                switch (e.key) {
+                    case 's':
+                    case 'S':
+                        if (!this.gameActive) {
+                            DEBUG.trace('keyboard.start');
+                            this.startGame();
+                        }
+                        break;
+                    case 'n':
+                    case 'N':
+                    case ' ':
+                        if (this.gameActive && !e.repeat) {
+                            DEBUG.trace('keyboard.next');
+                            this.nextQuestion();
+                            e.preventDefault();
+                        }
+                        break;
+                    case 'h':
+                    case 'H':
+                        if (this.gameActive && !e.repeat) {
+                            DEBUG.trace('keyboard.hint');
+                            this.showHint();
+                            e.preventDefault();
+                        }
+                        break;
+                    case 'r':
+                    case 'R':
+                        DEBUG.trace('keyboard.reset');
                         this.resetGame();
-                    }
-                    break;
-            }
-        });
-        
-        // Language change event
-        window.addEventListener('languageChanged', (e) => {
-            this._updateModeDisplay();
-            this._updateLevelDisplay();
-            if (this.currentElement && this.gameActive) {
-                this._askQuestion();
-            }
-        });
+                        break;
+                    case 'Escape':
+                        if (this.gameActive) {
+                            DEBUG.trace('keyboard.escape');
+                            this.resetGame();
+                        }
+                        break;
+                }
+            });
+            
+            // Language change event
+            window.addEventListener('languageChanged', (e) => {
+                DEBUG.trace('event.languageChanged');
+                this._updateModeDisplay();
+                this._updateLevelDisplay();
+                if (this.currentElement && this.gameActive) {
+                    this._askQuestion();
+                }
+            });
+            
+            DEBUG.info('Event listeners set up successfully', null, 'game');
+            
+        } catch (error) {
+            DEBUG.error('Error in _setupEventListeners', error, 'game');
+        }
     }
     
     _updateModeDisplay() {
@@ -215,47 +314,79 @@ class PeriodicTableGame {
     }
     
     startGame() {
-        if (this.gameActive) return;
+        DEBUG.info('Starting game...', {
+            currentMode: this.currentMode,
+            currentLevel: this.currentLevel,
+            maxAtomicNumber: this.maxAtomicNumber
+        }, 'game');
         
-        // Read current level and mode from UI
-        this._initializeFromUI();
-        
-        this.gameActive = true;
-        this.score = 0;
-        this.currentQuestion = 0;
-        this.usedElements = new Set();
-        this.hintsUsed = 0;
-        this.gameStartTime = Date.now();
-        
-        // Update UI
-        this._updateScoreDisplay();
-        this._clearFeedback();
-        
-        // Enable/disable buttons
-        if (this.startBtn) this.startBtn.disabled = true;
-        if (this.nextBtn) this.nextBtn.disabled = false;
-        if (this.hintBtn) this.hintBtn.disabled = false;
-        
-        // Hide all elements initially
-        this.table.hideAllElements();
-        this.table.clearAllHighlights();
-        this.table.hideElementInfo();
-        
-        // Show timer for timed modes
-        if (this._isTimedMode()) {
-            this.timeRemaining = 60;
-            this._startTimer();
-            if (this.timerContainerEl) {
-                this.timerContainerEl.style.display = 'flex';
-            }
-        } else {
-            if (this.timerContainerEl) {
-                this.timerContainerEl.style.display = 'none';
-            }
+        if (this.gameActive) {
+            DEBUG.warn('Game already active, ignoring start request', null, 'game');
+            return;
         }
         
-        // Ask first question
-        this._askQuestion();
+        try {
+            // Read current level and mode from UI
+            this._initializeFromUI();
+            
+            // Reset game state
+            this.gameActive = true;
+            this.score = 0;
+            this.currentQuestion = 0;
+            this.usedElements = new Set();
+            this.hintsUsed = 0;
+            this.gameStartTime = Date.now();
+            
+            DEBUG.recordState('game.start', {
+                mode: this.currentMode,
+                level: this.currentLevel,
+                maxAtomicNumber: this.maxAtomicNumber
+            });
+            
+            // Update UI
+            this._updateScoreDisplay();
+            this._clearFeedback();
+            
+            // Enable/disable buttons
+            if (this.startBtn) this.startBtn.disabled = true;
+            if (this.nextBtn) this.nextBtn.disabled = false;
+            if (this.hintBtn) this.hintBtn.disabled = false;
+            
+            // Validate table exists
+            DEBUG.assert(this.table, 'Table not initialized');
+            
+            // Hide all elements initially
+            this.table.hideAllElements();
+            this.table.clearAllHighlights();
+            this.table.hideElementInfo();
+            
+            // Show timer for timed modes
+            if (this._isTimedMode()) {
+                this.timeRemaining = 60;
+                this._startTimer();
+                if (this.timerContainerEl) {
+                    this.timerContainerEl.style.display = 'flex';
+                }
+            } else {
+                if (this.timerContainerEl) {
+                    this.timerContainerEl.style.display = 'none';
+                }
+            }
+            
+            // Ask first question
+            DEBUG.trace('askFirstQuestion');
+            this._askQuestion();
+            
+            DEBUG.info('Game started successfully', {
+                mode: this.currentMode,
+                level: this.currentLevel
+            }, 'game');
+            
+        } catch (error) {
+            DEBUG.error('Error starting game', error, 'game');
+            this.gameActive = false;
+            throw error;
+        }
     }
     
     _isTimedMode() {
@@ -307,100 +438,177 @@ class PeriodicTableGame {
     }
     
     _askQuestion() {
-        this._clearFeedback();
-        this.table.clearAllHighlights();
+        DEBUG.trace('askQuestion', {
+            questionNumber: this.currentQuestion,
+            totalQuestions: this.totalQuestions,
+            mode: this.currentMode
+        });
         
-        // Check if game should end
-        if (this.currentQuestion >= this.totalQuestions) {
-            this._endGame();
-            return;
-        }
-        
-        // Select a new element based on game mode
-        let element = null;
-        
-        switch (this.currentMode) {
-            case 'find-by-name':
-                element = this._getRandomElement();
-                break;
-            case 'find-by-symbol':
-                element = this._getRandomElement();
-                break;
-            case 'find-by-group':
-                // Random group from 1-18
-                const group = Math.floor(Math.random() * 18) + 1;
-                element = this.table.getRandomElementFromGroup(group);
-                if (!element) {
-                    element = this._getRandomElement();
-                }
-                break;
-            case 'find-by-period':
-                // Random period from 1-7
-                const period = Math.floor(Math.random() * 7) + 1;
-                element = this.table.getRandomElementFromPeriod(period);
-                if (!element) {
-                    element = this._getRandomElement();
-                }
-                break;
-            case 'study':
-                // In study mode, show all symbols and let user explore
-                this.table.showAllSymbols();
-                if (this.questionTextEl) {
-                    this.questionTextEl.textContent = this.i18n.translate('mode.studyInstructions', 'Click on any element to learn about it. Use the language selector to change language.');
-                }
+        try {
+            this._clearFeedback();
+            this.table.clearAllHighlights();
+            
+            // Check if game should end
+            if (this.currentQuestion >= this.totalQuestions) {
+                DEBUG.info('All questions answered, ending game', null, 'game');
+                this._endGame();
                 return;
-            default:
-                element = this._getRandomElement();
-        }
-        
-        if (!element) {
-            this._endGame();
-            return;
-        }
-        
-        this.currentElement = element;
-        
-        // Update question display
-        if (this.questionTextEl && this.elementPromptEl) {
+            }
+            
+            // Select a new element based on game mode
+            let element = null;
+            
             switch (this.currentMode) {
                 case 'find-by-name':
-                    this.questionTextEl.textContent = this.i18n.translate('question.find', 'Find the element: ') + 
-                        (this.i18n.getElementName(element.symbol) || element.name);
+                    element = this._getRandomElement();
                     break;
                 case 'find-by-symbol':
-                    this.questionTextEl.textContent = this.i18n.translate('question.findSymbol', 'Find the element with symbol: ') + element.symbol;
+                    element = this._getRandomElement();
                     break;
                 case 'find-by-group':
-                    const groupName = this.i18n.translate(`group.${element.group}`) || this._getGroupName(element.group);
-                    this.questionTextEl.textContent = this.i18n.translate('question.findGroup', 'Find an element in group: ') + 
-                        `${element.group} (${groupName})`;
+                    // Random group from 1-18
+                    const group = Math.floor(Math.random() * 18) + 1;
+                    element = this.table.getRandomElementFromGroup(group);
+                    if (!element) {
+                        DEBUG.warn(`No element found for group ${group}, falling back to random`, null, 'game');
+                        element = this._getRandomElement();
+                    }
                     break;
                 case 'find-by-period':
-                    this.questionTextEl.textContent = this.i18n.translate('question.findPeriod', 'Find an element in period: ') + element.period;
+                    // Random period from 1-7
+                    const period = Math.floor(Math.random() * 7) + 1;
+                    element = this.table.getRandomElementFromPeriod(period);
+                    if (!element) {
+                        DEBUG.warn(`No element found for period ${period}, falling back to random`, null, 'game');
+                        element = this._getRandomElement();
+                    }
                     break;
+                case 'study':
+                    // In study mode, show all symbols and let user explore
+                    this.table.showAllSymbols();
+                    if (this.questionTextEl) {
+                        this.questionTextEl.textContent = this.i18n.translate('mode.studyInstructions', 'Click on any element to learn about it. Use the language selector to change language.');
+                    }
+                    return;
+                default:
+                    DEBUG.warn(`Unknown mode: ${this.currentMode}, using random element`, null, 'game');
+                    element = this._getRandomElement();
             }
+            
+            if (!element) {
+                DEBUG.error('No element selected, ending game', {
+                    mode: this.currentMode,
+                    usedElements: Array.from(this.usedElements)
+                }, 'game');
+                this._endGame();
+                return;
+            }
+            
+            // Validate element
+            DEBUG.assert(element && element.symbol, 'Invalid element selected');
+            DEBUG.assert(element.number <= this.maxAtomicNumber, 
+                `Element ${element.symbol} (${element.number}) exceeds max atomic number ${this.maxAtomicNumber}`);
+            
+            this.currentElement = element;
+            DEBUG.recordState('game.question', {
+                questionNumber: this.currentQuestion,
+                element: {
+                    symbol: element.symbol,
+                    name: element.name,
+                    number: element.number,
+                    group: element.group,
+                    period: element.period
+                }
+            });
+            
+            // Update question display
+            if (this.questionTextEl) {
+                switch (this.currentMode) {
+                    case 'find-by-name':
+                        this.questionTextEl.textContent = this.i18n.translate('question.find', 'Find the element: ') + 
+                            (this.i18n.getElementName(element.symbol) || element.name);
+                        break;
+                    case 'find-by-symbol':
+                        this.questionTextEl.textContent = this.i18n.translate('question.findSymbol', 'Find the element with symbol: ') + element.symbol;
+                        break;
+                    case 'find-by-group':
+                        const groupName = this.i18n.translate(`group.${element.group}`) || this._getGroupName(element.group);
+                        this.questionTextEl.textContent = this.i18n.translate('question.findGroup', 'Find an element in group: ') + 
+                            `${element.group} (${groupName})`;
+                        break;
+                    case 'find-by-period':
+                        this.questionTextEl.textContent = this.i18n.translate('question.findPeriod', 'Find an element in period: ') + element.period;
+                        break;
+                }
+            } else {
+                DEBUG.warn('questionTextEl not found', null, 'game');
+            }
+            
+            // Update debug panel
+            DEBUG.updateDebugPanel(this);
+            
+        } catch (error) {
+            DEBUG.error('Error in _askQuestion', error, 'game');
+            throw error;
         }
     }
     
     _getRandomElement() {
-        // Get elements filtered by level
-        const allElements = window.PERIODIC_TABLE_DATA || [];
-        const levelElements = allElements.filter(el => el.number <= this.maxAtomicNumber);
-        const unusedElements = levelElements.filter(el => !this.usedElements.has(el.symbol));
+        DEBUG.trace('getRandomElement', {
+            maxAtomicNumber: this.maxAtomicNumber,
+            usedElementsCount: this.usedElements.size
+        });
         
-        if (unusedElements.length > 0) {
-            const randomIndex = Math.floor(Math.random() * unusedElements.length);
-            const element = unusedElements[randomIndex];
-            this.usedElements.add(element.symbol);
+        try {
+            // Get elements filtered by level
+            const allElements = window.PERIODIC_TABLE_DATA || [];
+            
+            if (allElements.length === 0) {
+                DEBUG.error('PERIODIC_TABLE_DATA is empty or not loaded', null, 'game');
+                return null;
+            }
+            
+            const levelElements = allElements.filter(el => el.number <= this.maxAtomicNumber);
+            
+            if (levelElements.length === 0) {
+                DEBUG.error('No elements found for current level', {
+                    maxAtomicNumber: this.maxAtomicNumber,
+                    allElementsCount: allElements.length
+                }, 'game');
+                return null;
+            }
+            
+            const unusedElements = levelElements.filter(el => !this.usedElements.has(el.symbol));
+            
+            let element;
+            
+            if (unusedElements.length > 0) {
+                const randomIndex = Math.floor(Math.random() * unusedElements.length);
+                element = unusedElements[randomIndex];
+                this.usedElements.add(element.symbol);
+                DEBUG.info(`Selected unused element: ${element.symbol} (${element.number})`, null, 'game');
+            } else {
+                // If all elements used for this level, reset and pick random from level
+                DEBUG.info('All elements used, resetting usedElements set', null, 'game');
+                this.usedElements.clear();
+                const randomIndex = Math.floor(Math.random() * levelElements.length);
+                element = levelElements[randomIndex];
+                this.usedElements.add(element.symbol);
+                DEBUG.info(`Selected element (reset): ${element.symbol} (${element.number})`, null, 'game');
+            }
+            
+            // Validate element
+            DEBUG.assert(element, 'No element selected');
+            DEBUG.assert(element.symbol, 'Element has no symbol');
+            DEBUG.assert(element.number <= this.maxAtomicNumber, 
+                `Element ${element.symbol} exceeds max atomic number`);
+            
             return element;
+            
+        } catch (error) {
+            DEBUG.error('Error in _getRandomElement', error, 'game');
+            return null;
         }
-        
-        // If all elements used for this level, reset and pick random from level
-        this.usedElements.clear();
-        const randomIndex = Math.floor(Math.random() * levelElements.length);
-        const element = levelElements[randomIndex];
-        this.usedElements.add(element.symbol);
-        return element;
     }
     
     _getGroupName(groupNumber) {
@@ -418,218 +626,416 @@ class PeriodicTableGame {
     }
     
     _handleElementClick(symbol, element) {
-        if (!this.gameActive || !this.currentElement) return;
+        DEBUG.trace('handleElementClick', {
+            symbol,
+            gameActive: this.gameActive,
+            currentElement: this.currentElement ? this.currentElement.symbol : null,
+            mode: this.currentMode
+        });
         
-        // In study mode, just show info
-        if (this.currentMode === 'study') {
-            this.table.selectElement(symbol);
-            return;
-        }
-        
-        // Hide element info panel for game modes (only show in study mode)
-        this.table.hideElementInfo();
-        this.table.clearAllHighlights();
-        
-        // Check answer
-        let isCorrect = false;
-        
-        switch (this.currentMode) {
-            case 'find-by-name':
-                isCorrect = symbol === this.currentElement.symbol;
-                break;
-            case 'find-by-symbol':
-                isCorrect = symbol === this.currentElement.symbol;
-                break;
-            case 'find-by-group':
-                isCorrect = element && element.group === this.currentElement.group;
-                break;
-            case 'find-by-period':
-                isCorrect = element && element.period === this.currentElement.period;
-                break;
-        }
-        
-        if (isCorrect) {
-            this._handleCorrectAnswer(symbol);
-        } else {
-            this._handleIncorrectAnswer(symbol);
+        try {
+            if (!this.gameActive) {
+                DEBUG.info('Game not active, ignoring click', { symbol }, 'game');
+                return;
+            }
+            
+            if (!this.currentElement) {
+                DEBUG.warn('No current element set, ignoring click', { symbol }, 'game');
+                return;
+            }
+            
+            // Validate symbol
+            if (!symbol) {
+                DEBUG.warn('No symbol provided in click', null, 'game');
+                return;
+            }
+            
+            // In study mode, just show info
+            if (this.currentMode === 'study') {
+                DEBUG.trace('studyMode.click', { symbol });
+                this.table.selectElement(symbol);
+                return;
+            }
+            
+            // Hide element info panel for game modes (only show in study mode)
+            this.table.hideElementInfo();
+            this.table.clearAllHighlights();
+            
+            // Check answer
+            let isCorrect = false;
+            
+            switch (this.currentMode) {
+                case 'find-by-name':
+                    isCorrect = symbol === this.currentElement.symbol;
+                    DEBUG.trace('checkAnswer.findByName', {
+                        selected: symbol,
+                        expected: this.currentElement.symbol,
+                        isCorrect
+                    });
+                    break;
+                case 'find-by-symbol':
+                    isCorrect = symbol === this.currentElement.symbol;
+                    DEBUG.trace('checkAnswer.findBySymbol', {
+                        selected: symbol,
+                        expected: this.currentElement.symbol,
+                        isCorrect
+                    });
+                    break;
+                case 'find-by-group':
+                    isCorrect = element && element.group === this.currentElement.group;
+                    DEBUG.trace('checkAnswer.findByGroup', {
+                        selected: symbol,
+                        selectedGroup: element ? element.group : null,
+                        expectedGroup: this.currentElement.group,
+                        isCorrect
+                    });
+                    break;
+                case 'find-by-period':
+                    isCorrect = element && element.period === this.currentElement.period;
+                    DEBUG.trace('checkAnswer.findByPeriod', {
+                        selected: symbol,
+                        selectedPeriod: element ? element.period : null,
+                        expectedPeriod: this.currentElement.period,
+                        isCorrect
+                    });
+                    break;
+            }
+            
+            if (isCorrect) {
+                DEBUG.info('Correct answer!', { symbol }, 'game');
+                this._handleCorrectAnswer(symbol);
+            } else {
+                DEBUG.info('Incorrect answer', {
+                    selected: symbol,
+                    expected: this.currentElement.symbol
+                }, 'game');
+                this._handleIncorrectAnswer(symbol);
+            }
+            
+        } catch (error) {
+            DEBUG.error('Error in _handleElementClick', error, 'game');
         }
     }
     
     _handleCorrectAnswer(symbol) {
-        this.score++;
-        this._updateScoreDisplay();
+        DEBUG.trace('handleCorrectAnswer', { symbol, currentScore: this.score });
         
-        // Highlight correct element
-        this.table.highlightElement(symbol, 'correct');
-        
-        // Show feedback
-        if (this.feedbackTextEl) {
-            this.feedbackTextEl.textContent = this.i18n.translate('feedback.correct', 'Correct!') + ' ' + 
-                (this.i18n.getElementName(symbol) || symbol);
-            this.feedbackTextEl.className = 'feedback correct';
+        try {
+            this.score++;
+            DEBUG.info(`Score incremented to: ${this.score}`, null, 'game');
+            this._updateScoreDisplay();
+            
+            // Validate symbol
+            DEBUG.assert(symbol, 'No symbol provided');
+            
+            // Highlight correct element
+            this.table.highlightElement(symbol, 'correct');
+            
+            // Show feedback
+            if (this.feedbackTextEl) {
+                const elementName = this.i18n.getElementName(symbol) || symbol;
+                this.feedbackTextEl.textContent = this.i18n.translate('feedback.correct', 'Correct!') + ' ' + elementName;
+                this.feedbackTextEl.className = 'feedback correct';
+                DEBUG.trace('showFeedback.correct', { message: this.feedbackTextEl.textContent });
+            } else {
+                DEBUG.warn('feedbackTextEl not found', null, 'game');
+            }
+            
+            // Reveal the element
+            this.table.revealElement(symbol, true);
+            
+            // Move to next question after delay
+            DEBUG.trace('scheduleNextQuestion', { delay: 1000 });
+            setTimeout(() => {
+                this.currentQuestion++;
+                DEBUG.recordState('game.correctAnswer', {
+                    score: this.score,
+                    question: this.currentQuestion
+                });
+                this._askQuestion();
+            }, 1000);
+            
+        } catch (error) {
+            DEBUG.error('Error in _handleCorrectAnswer', error, 'game');
         }
-        
-        // Reveal the element
-        this.table.revealElement(symbol, true);
-        
-        // Move to next question after delay
-        setTimeout(() => {
-            this.currentQuestion++;
-            this._askQuestion();
-        }, 1000);
     }
     
     _handleIncorrectAnswer(symbol) {
-        // Highlight incorrect selection
-        this.table.highlightElement(symbol, 'incorrect');
+        DEBUG.trace('handleIncorrectAnswer', {
+            selected: symbol,
+            expected: this.currentElement.symbol
+        });
         
-        // Show feedback
-        if (this.feedbackTextEl) {
-            const correctName = this.i18n.getElementName(this.currentElement.symbol) || this.currentElement.name;
-            const correctSymbol = this.currentElement.symbol;
+        try {
+            // Highlight incorrect selection
+            this.table.highlightElement(symbol, 'incorrect');
             
-            let message = '';
-            switch (this.currentMode) {
-                case 'find-by-name':
-                case 'find-by-symbol':
-                    message = this.i18n.translate('feedback.incorrect', 'Incorrect. The correct answer is:') + ' ' + correctName + ' (' + correctSymbol + ')';
-                    break;
-                case 'find-by-group':
-                    message = this.i18n.translate('feedback.incorrectGroup', 'Incorrect. That element is in group:') + ' ' + this._getGroupName(this.currentElement.group);
-                    break;
-                case 'find-by-period':
-                    message = this.i18n.translate('feedback.incorrectPeriod', 'Incorrect. That element is in period:') + ' ' + this.currentElement.period;
-                    break;
+            // Show feedback
+            if (this.feedbackTextEl) {
+                const correctName = this.i18n.getElementName(this.currentElement.symbol) || this.currentElement.name;
+                const correctSymbol = this.currentElement.symbol;
+                
+                let message = '';
+                switch (this.currentMode) {
+                    case 'find-by-name':
+                    case 'find-by-symbol':
+                        message = this.i18n.translate('feedback.incorrect', 'Incorrect. The correct answer is:') + ' ' + correctName + ' (' + correctSymbol + ')';
+                        break;
+                    case 'find-by-group':
+                        message = this.i18n.translate('feedback.incorrectGroup', 'Incorrect. That element is in group:') + ' ' + this._getGroupName(this.currentElement.group);
+                        break;
+                    case 'find-by-period':
+                        message = this.i18n.translate('feedback.incorrectPeriod', 'Incorrect. That element is in period:') + ' ' + this.currentElement.period;
+                        break;
+                }
+                
+                this.feedbackTextEl.textContent = message;
+                this.feedbackTextEl.className = 'feedback incorrect';
+                DEBUG.trace('showFeedback.incorrect', { message });
+            } else {
+                DEBUG.warn('feedbackTextEl not found', null, 'game');
             }
             
-            this.feedbackTextEl.textContent = message;
-            this.feedbackTextEl.className = 'feedback incorrect';
+            // Validate currentElement
+            DEBUG.assert(this.currentElement && this.currentElement.symbol, 
+                'No current element to reveal');
+            
+            // Reveal the correct element
+            this.table.revealElement(this.currentElement.symbol, true);
+            this.table.highlightElement(this.currentElement.symbol, 'correct');
+            
+            // Move to next question after delay
+            DEBUG.trace('scheduleNextQuestion', { delay: 1500 });
+            setTimeout(() => {
+                this.currentQuestion++;
+                DEBUG.recordState('game.incorrectAnswer', {
+                    score: this.score,
+                    question: this.currentQuestion,
+                    selected: symbol,
+                    expected: this.currentElement.symbol
+                });
+                this._askQuestion();
+            }, 1500);
+            
+        } catch (error) {
+            DEBUG.error('Error in _handleIncorrectAnswer', error, 'game');
         }
-        
-        // Reveal the correct element
-        this.table.revealElement(this.currentElement.symbol, true);
-        this.table.highlightElement(this.currentElement.symbol, 'correct');
-        
-        // Move to next question after delay
-        setTimeout(() => {
-            this.currentQuestion++;
-            this._askQuestion();
-        }, 1500);
     }
     
     showHint() {
-        if (!this.gameActive || !this.currentElement || this.hintsUsed >= 3) return;
+        DEBUG.trace('showHint', {
+            gameActive: this.gameActive,
+            hasCurrentElement: !!this.currentElement,
+            hintsUsed: this.hintsUsed
+        });
         
-        this.hintsUsed++;
-        
-        // Highlight the correct element briefly
-        this.table.highlightElement(this.currentElement.symbol, 'hint');
-        
-        if (this.feedbackTextEl) {
-            this.feedbackTextEl.textContent = this.i18n.translate('feedback.hint', 'Hint: Element is highlighted!') + ' ' +
-                (this.i18n.translate('feedback.hintsRemaining', 'Hints remaining:') + ' ' + (3 - this.hintsUsed));
-            this.feedbackTextEl.className = 'feedback hint';
+        try {
+            if (!this.gameActive) {
+                DEBUG.info('Cannot show hint - game not active', null, 'game');
+                return;
+            }
+            
+            if (!this.currentElement) {
+                DEBUG.warn('Cannot show hint - no current element', null, 'game');
+                return;
+            }
+            
+            if (this.hintsUsed >= 3) {
+                DEBUG.info('Maximum hints used (3)', null, 'game');
+                return;
+            }
+            
+            this.hintsUsed++;
+            DEBUG.info(`Hint used (${this.hintsUsed}/3)`, null, 'game');
+            
+            // Validate symbol
+            DEBUG.assert(this.currentElement.symbol, 'No symbol to highlight');
+            
+            // Highlight the correct element briefly
+            this.table.highlightElement(this.currentElement.symbol, 'hint');
+            
+            if (this.feedbackTextEl) {
+                this.feedbackTextEl.textContent = this.i18n.translate('feedback.hint', 'Hint: Element is highlighted!') + ' ' +
+                    (this.i18n.translate('feedback.hintsRemaining', 'Hints remaining:') + ' ' + (3 - this.hintsUsed));
+                this.feedbackTextEl.className = 'feedback hint';
+                DEBUG.trace('showFeedback.hint', { message: this.feedbackTextEl.textContent });
+            }
+            
+            // Remove highlight after delay
+            setTimeout(() => {
+                this.table.clearHighlight(this.currentElement.symbol, 'hint');
+                DEBUG.trace('clearHintHighlight');
+            }, 2000);
+            
+        } catch (error) {
+            DEBUG.error('Error in showHint', error, 'game');
         }
-        
-        // Remove highlight after delay
-        setTimeout(() => {
-            this.table.clearHighlight(this.currentElement.symbol, 'hint');
-        }, 2000);
     }
     
     nextQuestion() {
-        if (!this.gameActive) return;
+        DEBUG.trace('nextQuestion', {
+            gameActive: this.gameActive,
+            currentQuestion: this.currentQuestion
+        });
         
-        this._clearFeedback();
-        this.table.clearAllHighlights();
-        this.table.hideElementInfo();
-        
-        this.currentQuestion++;
-        this._askQuestion();
+        try {
+            if (!this.gameActive) {
+                DEBUG.info('Cannot go to next question - game not active', null, 'game');
+                return;
+            }
+            
+            this._clearFeedback();
+            this.table.clearAllHighlights();
+            this.table.hideElementInfo();
+            
+            this.currentQuestion++;
+            DEBUG.info(`Moving to question ${this.currentQuestion}`, null, 'game');
+            
+            this._askQuestion();
+            
+        } catch (error) {
+            DEBUG.error('Error in nextQuestion', error, 'game');
+        }
     }
     
     _endGame() {
-        this.gameActive = false;
-        this._stopTimer();
+        DEBUG.info('Ending game...', {
+            score: this.score,
+            totalQuestions: this.totalQuestions,
+            duration: this.gameStartTime ? (Date.now() - this.gameStartTime) / 1000 : 0
+        }, 'game');
         
-        // Calculate performance
-        const endTime = Date.now();
-        const duration = (endTime - this.gameStartTime) / 1000;
-        const scorePercentage = Math.round((this.score / this.totalQuestions) * 100);
-        
-        let performanceMessage = '';
-        if (scorePercentage >= 90) {
-            performanceMessage = this.i18n.translate('performance.excellent', 'Excellent work! You are a periodic table master!');
-        } else if (scorePercentage >= 70) {
-            performanceMessage = this.i18n.translate('performance.good', 'Good job! Keep practicing to improve.');
-        } else if (scorePercentage >= 50) {
-            performanceMessage = this.i18n.translate('performance.ok', 'Not bad! Review the elements you missed.');
-        } else {
-            performanceMessage = this.i18n.translate('performance.practice', 'Keep practicing! You will get better with time.');
-        }
-        
-        // Show game over modal
-        if (this.finalScoreEl) {
-            this.finalScoreEl.textContent = this.score;
-        }
-        if (this.finalTotalEl) {
-            this.finalTotalEl.textContent = this.totalQuestions;
-        }
-        if (this.performanceTextEl) {
-            this.performanceTextEl.textContent = performanceMessage;
-        }
-        
-        if (this.gameOverModal) {
-            this.gameOverModal.style.display = 'block';
-            if (this.playAgainBtn) {
-                this.playAgainBtn.focus();
+        try {
+            this.gameActive = false;
+            this._stopTimer();
+            
+            // Calculate performance
+            const endTime = Date.now();
+            const duration = (endTime - this.gameStartTime) / 1000;
+            const scorePercentage = Math.round((this.score / this.totalQuestions) * 100);
+            
+            DEBUG.recordState('game.ended', {
+                score: this.score,
+                totalQuestions: this.totalQuestions,
+                scorePercentage,
+                duration
+            });
+            
+            let performanceMessage = '';
+            if (scorePercentage >= 90) {
+                performanceMessage = this.i18n.translate('performance.excellent', 'Excellent work! You are a periodic table master!');
+            } else if (scorePercentage >= 70) {
+                performanceMessage = this.i18n.translate('performance.good', 'Good job! Keep practicing to improve.');
+            } else if (scorePercentage >= 50) {
+                performanceMessage = this.i18n.translate('performance.ok', 'Not bad! Review the elements you missed.');
+            } else {
+                performanceMessage = this.i18n.translate('performance.practice', 'Keep practicing! You will get better with time.');
             }
+            
+            // Show game over modal
+            if (this.finalScoreEl) {
+                this.finalScoreEl.textContent = this.score;
+            } else {
+                DEBUG.warn('finalScoreEl not found', null, 'game');
+            }
+            
+            if (this.finalTotalEl) {
+                this.finalTotalEl.textContent = this.totalQuestions;
+            } else {
+                DEBUG.warn('finalTotalEl not found', null, 'game');
+            }
+            
+            if (this.performanceTextEl) {
+                this.performanceTextEl.textContent = performanceMessage;
+            } else {
+                DEBUG.warn('performanceTextEl not found', null, 'game');
+            }
+            
+            if (this.gameOverModal) {
+                this.gameOverModal.style.display = 'block';
+                if (this.playAgainBtn) {
+                    this.playAgainBtn.focus();
+                }
+            } else {
+                DEBUG.warn('gameOverModal not found', null, 'game');
+            }
+            
+            // Reset buttons
+            if (this.startBtn) this.startBtn.disabled = false;
+            if (this.nextBtn) this.nextBtn.disabled = true;
+            if (this.hintBtn) this.hintBtn.disabled = true;
+            
+            DEBUG.info('Game ended successfully', {
+                score: this.score,
+                totalQuestions: this.totalQuestions
+            }, 'game');
+            
+        } catch (error) {
+            DEBUG.error('Error in _endGame', error, 'game');
+            throw error;
         }
-        
-        // Reset buttons
-        if (this.startBtn) this.startBtn.disabled = false;
-        if (this.nextBtn) this.nextBtn.disabled = true;
-        if (this.hintBtn) this.hintBtn.disabled = true;
     }
     
     resetGame() {
-        this.gameActive = false;
-        this._stopTimer();
-        this._clearFeedback();
+        DEBUG.info('Resetting game...', null, 'game');
         
-        // Hide modals
-        if (this.gameOverModal) {
-            this.gameOverModal.style.display = 'none';
-        }
-        
-        // Reset display
-        this.score = 0;
-        this.currentQuestion = 0;
-        this.currentElement = null;
-        this.usedElements.clear();
-        this.hintsUsed = 0;
-        
-        this._updateScoreDisplay();
-        this._updateTimerDisplay();
-        
-        // Reset buttons
-        if (this.startBtn) this.startBtn.disabled = false;
-        if (this.nextBtn) this.nextBtn.disabled = true;
-        if (this.hintBtn) this.hintBtn.disabled = true;
-        
-        // Clear table
-        this.table.hideAllElements();
-        this.table.clearAllHighlights();
-        this.table.hideElementInfo();
-        
-        // Reset question display
-        if (this.questionTextEl) {
-            this.questionTextEl.textContent = '';
-        }
-        
-        // Hide timer
-        if (this.timerContainerEl) {
-            this.timerContainerEl.style.display = 'none';
+        try {
+            this.gameActive = false;
+            this._stopTimer();
+            this._clearFeedback();
+            
+            // Hide modals
+            if (this.gameOverModal) {
+                this.gameOverModal.style.display = 'none';
+            }
+            
+            // Reset display
+            this.score = 0;
+            this.currentQuestion = 0;
+            this.currentElement = null;
+            this.usedElements.clear();
+            this.hintsUsed = 0;
+            this.gameStartTime = null;
+            
+            DEBUG.recordState('game.reset', {
+                score: 0,
+                question: 0,
+                usedElements: 0,
+                hintsUsed: 0
+            });
+            
+            this._updateScoreDisplay();
+            this._updateTimerDisplay();
+            
+            // Reset buttons
+            if (this.startBtn) this.startBtn.disabled = false;
+            if (this.nextBtn) this.nextBtn.disabled = true;
+            if (this.hintBtn) this.hintBtn.disabled = true;
+            
+            // Clear table
+            if (this.table) {
+                this.table.hideAllElements();
+                this.table.clearAllHighlights();
+                this.table.hideElementInfo();
+            }
+            
+            // Reset question display
+            if (this.questionTextEl) {
+                this.questionTextEl.textContent = '';
+            }
+            
+            // Hide timer
+            if (this.timerContainerEl) {
+                this.timerContainerEl.style.display = 'none';
+            }
+            
+            // Update debug panel
+            DEBUG.updateDebugPanel(this);
+            
+            DEBUG.info('Game reset successfully', null, 'game');
+            
+        } catch (error) {
+            DEBUG.error('Error in resetGame', error, 'game');
         }
     }
     
@@ -648,11 +1054,44 @@ class PeriodicTableGame {
 
 // Initialize game when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
+    DEBUG.info('DOMContentLoaded event fired', null, 'init');
+    
     // Wait for i18n to initialize
     const checkI18n = setInterval(() => {
         if (window.I18n) {
+            DEBUG.info('I18n initialized, creating game instance', null, 'init');
             clearInterval(checkI18n);
-            window.game = new PeriodicTableGame();
+            
+            try {
+                window.game = new PeriodicTableGame();
+                DEBUG.info('Game instance created successfully', null, 'init');
+                
+                // Validate initialization
+                if (window.debugGame) {
+                    window.debugGame.validateGameState(window.game);
+                }
+                
+            } catch (error) {
+                DEBUG.error('Failed to create game instance', error, 'init');
+                console.error('Failed to initialize game:', error);
+            }
         }
     }, 100);
+    
+    // Timeout fallback for i18n initialization
+    setTimeout(() => {
+        if (!window.I18n) {
+            DEBUG.warn('I18n initialization timeout, creating with default', null, 'init');
+            if (checkI18n) {
+                clearInterval(checkI18n);
+            }
+            try {
+                window.I18n = new I18n();
+                window.game = new PeriodicTableGame();
+            } catch (error) {
+                DEBUG.error('Failed to create fallback game instance', error, 'init');
+                console.error('Critical error: Cannot initialize game without i18n');
+            }
+        }
+    }, 5000);
 });

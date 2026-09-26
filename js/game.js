@@ -30,9 +30,6 @@ class PeriodicTableGame {
         
         // Initialize
         this._initialize();
-        
-        // Set maxAtomicNumber from initial level
-        this.maxAtomicNumber = this.levels[this.currentLevel] || 118;
     }
     
     _initialize() {
@@ -46,19 +43,7 @@ class PeriodicTableGame {
         this.levelValueEl = document.getElementById('level-value');
         this.levelLabelEl = document.getElementById('level-label');
         this.questionTextEl = document.getElementById('question-text');
-        this.questionPrefixEl = document.getElementById('question-prefix');
         this.elementPromptEl = document.getElementById('element-prompt');
-        
-        // Initialize question display with default values
-        if (this.questionPrefixEl && !this.questionPrefixEl.textContent.trim()) {
-            this.questionPrefixEl.textContent = this.i18n.translate('question.find', 'Find the element:') + ' ';
-        }
-        if (this.elementPromptEl && !this.elementPromptEl.textContent.trim()) {
-            this.elementPromptEl.textContent = this.i18n.getElementName('H') || 'Hydrogen';
-        }
-        if (this.questionTextEl && !this.questionTextEl.textContent.trim()) {
-            this.questionTextEl.textContent = this.questionPrefixEl.textContent + this.elementPromptEl.textContent;
-        }
         this.feedbackTextEl = document.getElementById('feedback-text');
         this.timerContainerEl = document.getElementById('timer-container');
         this.timerValueEl = document.getElementById('timer-value');
@@ -82,6 +67,24 @@ class PeriodicTableGame {
         // Hide timer initially
         if (this.timerContainerEl) {
             this.timerContainerEl.style.display = 'none';
+        }
+        
+        // Initialize level and mode from UI
+        this._initializeFromUI();
+    }
+    
+    _initializeFromUI() {
+        const checkedLevelInput = document.querySelector('input[name="game-level"]:checked');
+        if (checkedLevelInput) {
+            this.currentLevel = checkedLevelInput.value;
+            this.maxAtomicNumber = this.levels[this.currentLevel] || 118;
+        } else {
+            this.maxAtomicNumber = 118;
+        }
+        
+        const checkedModeInput = document.querySelector('input[name="game-mode"]:checked');
+        if (checkedModeInput) {
+            this.currentMode = checkedModeInput.value;
         }
     }
     
@@ -130,33 +133,8 @@ class PeriodicTableGame {
             });
         });
         
-        // Mode selection - also clear question when mode changes
-        const modeInputs = document.querySelectorAll('input[name="game-mode"]');
-        modeInputs.forEach(input => {
-            input.addEventListener('change', (e) => {
-                this.currentMode = e.target.value;
-                this._updateModeDisplay();
-            });
-        });
-        
-        // Initialize currentLevel from the checked radio button
-        const checkedLevelInput = document.querySelector('input[name="game-level"]:checked');
-        if (checkedLevelInput) {
-            this.currentLevel = checkedLevelInput.value;
-            this.maxAtomicNumber = this.levels[this.currentLevel] || 118;
-            this._updateLevelDisplay();
-        }
-        
-        // Initialize currentMode from the checked radio button
-        const checkedModeInput = document.querySelector('input[name="game-mode"]:checked');
-        if (checkedModeInput) {
-            this.currentMode = checkedModeInput.value;
-            this._updateModeDisplay();
-        }
-        
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            // Ignore if typing in an input
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
                 return;
             }
@@ -195,32 +173,11 @@ class PeriodicTableGame {
             }
         });
         
-        // Close element info on click outside
-        document.addEventListener('click', (e) => {
-            const infoPanel = document.getElementById('element-info');
-            const closeBtn = document.getElementById('close-info-btn');
-            
-            if (infoPanel && infoPanel.style.display === 'block') {
-                if (!infoPanel.contains(e.target) && !closeBtn.contains(e.target)) {
-                    this.table.hideElementInfo();
-                }
-            }
-        });
-        
-        // Close button for element info
-        const closeInfoBtn = document.getElementById('close-info-btn');
-        if (closeInfoBtn) {
-            closeInfoBtn.addEventListener('click', () => {
-                this.table.hideElementInfo();
-            });
-        }
-        
         // Language change event
         window.addEventListener('languageChanged', (e) => {
             this._updateModeDisplay();
             this._updateLevelDisplay();
             if (this.currentElement && this.gameActive) {
-                // Re-render the question with new language
                 this._askQuestion();
             }
         });
@@ -252,27 +209,13 @@ class PeriodicTableGame {
             };
             this.levelValueEl.textContent = levelNames[this.currentLevel] || this.currentLevel;
         }
-        
-        // Clear question display when level changes
-        if (this.questionPrefixEl) this.questionPrefixEl.textContent = '';
-        if (this.elementPromptEl) this.elementPromptEl.textContent = '';
     }
     
     startGame() {
         if (this.gameActive) return;
         
         // Read current level and mode from UI
-        const checkedLevelInput = document.querySelector('input[name="game-level"]:checked');
-        if (checkedLevelInput) {
-            this.currentLevel = checkedLevelInput.value;
-            this.maxAtomicNumber = this.levels[this.currentLevel] || 118;
-            this._updateLevelDisplay();
-        }
-        const checkedModeInput = document.querySelector('input[name="game-mode"]:checked');
-        if (checkedModeInput) {
-            this.currentMode = checkedModeInput.value;
-            this._updateModeDisplay();
-        }
+        this._initializeFromUI();
         
         this.gameActive = true;
         this.score = 0;
@@ -280,8 +223,6 @@ class PeriodicTableGame {
         this.usedElements = new Set();
         this.hintsUsed = 0;
         this.gameStartTime = Date.now();
-        
-
         
         // Update UI
         this._updateScoreDisplay();
@@ -385,33 +326,24 @@ class PeriodicTableGame {
             case 'find-by-group':
                 // Random group from 1-18
                 const group = Math.floor(Math.random() * 18) + 1;
-                element = this.table.getRandomElementFromGroup(group, this.maxAtomicNumber);
+                element = this.table.getRandomElementFromGroup(group);
                 if (!element) {
-                    // Fallback to random element
                     element = this._getRandomElement();
                 }
                 break;
             case 'find-by-period':
                 // Random period from 1-7
                 const period = Math.floor(Math.random() * 7) + 1;
-                element = this.table.getRandomElementFromPeriod(period, this.maxAtomicNumber);
+                element = this.table.getRandomElementFromPeriod(period);
                 if (!element) {
-                    // Fallback to random element
                     element = this._getRandomElement();
                 }
                 break;
             case 'study':
                 // In study mode, show all symbols and let user explore
                 this.table.showAllSymbols();
-                if (this.questionPrefixEl) {
-                    this.questionPrefixEl.textContent = this.i18n.translate('mode.studyInstructions', 'Click on any element to learn about it. Use the language selector to change language.');
-                }
-                if (this.elementPromptEl) {
-                    this.elementPromptEl.textContent = '';
-                }
                 if (this.questionTextEl) {
-                    this.questionTextEl.textContent = (this.questionPrefixEl ? this.questionPrefixEl.textContent : '') + 
-                        (this.elementPromptEl ? this.elementPromptEl.textContent : '');
+                    this.questionTextEl.textContent = this.i18n.translate('mode.studyInstructions', 'Click on any element to learn about it. Use the language selector to change language.');
                 }
                 return;
             default:
@@ -426,37 +358,29 @@ class PeriodicTableGame {
         this.currentElement = element;
         
         // Update question display
-        if (this.questionPrefixEl && this.elementPromptEl) {
+        if (this.questionTextEl && this.elementPromptEl) {
             switch (this.currentMode) {
                 case 'find-by-name':
-                    this.questionPrefixEl.textContent = this.i18n.translate('question.find', 'Find the element:') + ' ';
-                    this.elementPromptEl.textContent = this.i18n.getElementName(element.symbol) || element.name;
+                    this.questionTextEl.textContent = this.i18n.translate('question.find', 'Find the element: ') + 
+                        (this.i18n.getElementName(element.symbol) || element.name);
                     break;
                 case 'find-by-symbol':
-                    this.questionPrefixEl.textContent = this.i18n.translate('question.findSymbol', 'Find the element with symbol:') + ' ';
-                    this.elementPromptEl.textContent = element.symbol;
+                    this.questionTextEl.textContent = this.i18n.translate('question.findSymbol', 'Find the element with symbol: ') + element.symbol;
                     break;
                 case 'find-by-group':
                     const groupName = this.i18n.translate(`group.${element.group}`) || this._getGroupName(element.group);
-                    this.questionPrefixEl.textContent = this.i18n.translate('question.findGroup', 'Find an element in group:') + ' ';
-                    this.elementPromptEl.textContent = `${element.group} (${groupName})`;
+                    this.questionTextEl.textContent = this.i18n.translate('question.findGroup', 'Find an element in group: ') + 
+                        `${element.group} (${groupName})`;
                     break;
                 case 'find-by-period':
-                    this.questionPrefixEl.textContent = this.i18n.translate('question.findPeriod', 'Find an element in period:') + ' ';
-                    this.elementPromptEl.textContent = element.period.toString();
+                    this.questionTextEl.textContent = this.i18n.translate('question.findPeriod', 'Find an element in period: ') + element.period;
                     break;
             }
-        }
-        
-        // Also set the full question text for the parent p element
-        if (this.questionTextEl) {
-            this.questionTextEl.textContent = (this.questionPrefixEl ? this.questionPrefixEl.textContent : '') + 
-                (this.elementPromptEl ? this.elementPromptEl.textContent : '');
         }
     }
     
     _getRandomElement() {
-        // Try to get an element not used yet, filtered by level
+        // Get elements filtered by level
         const allElements = window.PERIODIC_TABLE_DATA || [];
         const levelElements = allElements.filter(el => el.number <= this.maxAtomicNumber);
         const unusedElements = levelElements.filter(el => !this.usedElements.has(el.symbol));
@@ -504,18 +428,15 @@ class PeriodicTableGame {
         
         switch (this.currentMode) {
             case 'find-by-name':
-                // Check if this is the element we're looking for
                 isCorrect = symbol === this.currentElement.symbol;
                 break;
             case 'find-by-symbol':
                 isCorrect = symbol === this.currentElement.symbol;
                 break;
             case 'find-by-group':
-                // Check if element is in the same group
                 isCorrect = element && element.group === this.currentElement.group;
                 break;
             case 'find-by-period':
-                // Check if element is in the same period
                 isCorrect = element && element.period === this.currentElement.period;
                 break;
         }
@@ -567,7 +488,7 @@ class PeriodicTableGame {
                     message = this.i18n.translate('feedback.incorrect', 'Incorrect. The correct answer is:') + ' ' + correctName + ' (' + correctSymbol + ')';
                     break;
                 case 'find-by-group':
-                    message = this.i18n.translate('feedback.incorrectGroup', 'Incorrect. That element is in group:') + ' ' + (this._getGroupName(this.currentElement.group));
+                    message = this.i18n.translate('feedback.incorrectGroup', 'Incorrect. That element is in group:') + ' ' + this._getGroupName(this.currentElement.group);
                     break;
                 case 'find-by-period':
                     message = this.i18n.translate('feedback.incorrectPeriod', 'Incorrect. That element is in period:') + ' ' + this.currentElement.period;
@@ -626,7 +547,7 @@ class PeriodicTableGame {
         
         // Calculate performance
         const endTime = Date.now();
-        const duration = (endTime - this.gameStartTime) / 1000; // in seconds
+        const duration = (endTime - this.gameStartTime) / 1000;
         const scorePercentage = Math.round((this.score / this.totalQuestions) * 100);
         
         let performanceMessage = '';
@@ -653,7 +574,6 @@ class PeriodicTableGame {
         
         if (this.gameOverModal) {
             this.gameOverModal.style.display = 'block';
-            // Focus on play again button for accessibility
             if (this.playAgainBtn) {
                 this.playAgainBtn.focus();
             }
@@ -696,12 +616,6 @@ class PeriodicTableGame {
         this.table.hideElementInfo();
         
         // Reset question display
-        if (this.questionPrefixEl) {
-            this.questionPrefixEl.textContent = '';
-        }
-        if (this.elementPromptEl) {
-            this.elementPromptEl.textContent = '';
-        }
         if (this.questionTextEl) {
             this.questionTextEl.textContent = '';
         }

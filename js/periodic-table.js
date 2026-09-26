@@ -178,8 +178,8 @@ class PeriodicTable {
     constructor(containerId, onElementClick = null) {
         this.container = document.getElementById(containerId);
         this.onElementClick = onElementClick;
-        this.elements = {}; // Map of element symbols to data
-        this.grid = []; // 2D grid representation
+        this.elements = {};
+        this.grid = [];
         this.selectedElement = null;
         
         // Initialize data structures
@@ -526,12 +526,12 @@ class PeriodicTable {
         return element || null;
     }
     
-    getElementsByGroup(group, maxAtomicNumber = 118) {
-        return PERIODIC_TABLE_DATA.filter(el => el.group === group && el.number <= maxAtomicNumber);
+    getElementsByGroup(group) {
+        return PERIODIC_TABLE_DATA.filter(el => el.group === group);
     }
     
-    getElementsByPeriod(period, maxAtomicNumber = 118) {
-        return PERIODIC_TABLE_DATA.filter(el => el.period === period && el.number <= maxAtomicNumber);
+    getElementsByPeriod(period) {
+        return PERIODIC_TABLE_DATA.filter(el => el.period === period);
     }
     
     getElementsByBlock(block) {
@@ -547,29 +547,15 @@ class PeriodicTable {
         return PERIODIC_TABLE_DATA[randomIndex];
     }
     
-    getRandomElementFromGroup(group, maxAtomicNumber = 118) {
-        const elements = this.getElementsByGroup(group, maxAtomicNumber);
+    getRandomElementFromGroup(group) {
+        const elements = this.getElementsByGroup(group);
         if (elements.length === 0) return null;
         const randomIndex = Math.floor(Math.random() * elements.length);
         return elements[randomIndex];
     }
     
-    getRandomElementFromPeriod(period, maxAtomicNumber = 118) {
-        const elements = this.getElementsByPeriod(period, maxAtomicNumber);
-        if (elements.length === 0) return null;
-        const randomIndex = Math.floor(Math.random() * elements.length);
-        return elements[randomIndex];
-    }
-    
-    getRandomElementFromBlock(block) {
-        const elements = this.getElementsByBlock(block);
-        if (elements.length === 0) return null;
-        const randomIndex = Math.floor(Math.random() * elements.length);
-        return elements[randomIndex];
-    }
-    
-    getRandomElementFromCategory(category) {
-        const elements = this.getElementsByCategory(category);
+    getRandomElementFromPeriod(period) {
+        const elements = this.getElementsByPeriod(period);
         if (elements.length === 0) return null;
         const randomIndex = Math.floor(Math.random() * elements.length);
         return elements[randomIndex];

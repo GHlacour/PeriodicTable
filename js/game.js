@@ -46,6 +46,7 @@ class PeriodicTableGame {
         this.levelValueEl = document.getElementById('level-value');
         this.levelLabelEl = document.getElementById('level-label');
         this.questionTextEl = document.getElementById('question-text');
+        this.questionPrefixEl = document.getElementById('question-prefix');
         this.elementPromptEl = document.getElementById('element-prompt');
         this.feedbackTextEl = document.getElementById('feedback-text');
         this.timerContainerEl = document.getElementById('timer-container');
@@ -190,7 +191,8 @@ class PeriodicTableGame {
         // Language change event
         window.addEventListener('languageChanged', (e) => {
             this._updateModeDisplay();
-            if (this.currentElement) {
+            this._updateLevelDisplay();
+            if (this.currentElement && this.gameActive) {
                 // Re-render the question with new language
                 this._askQuestion();
             }
@@ -370,8 +372,8 @@ class PeriodicTableGame {
             case 'study':
                 // In study mode, show all symbols and let user explore
                 this.table.showAllSymbols();
-                if (this.questionTextEl) {
-                    this.questionTextEl.textContent = this.i18n.translate('mode.studyInstructions', 'Click on any element to learn about it. Use the language selector to change language.');
+                if (this.questionPrefixEl) {
+                    this.questionPrefixEl.textContent = this.i18n.translate('mode.studyInstructions', 'Click on any element to learn about it. Use the language selector to change language.');
                 }
                 if (this.elementPromptEl) {
                     this.elementPromptEl.textContent = '';
@@ -389,23 +391,23 @@ class PeriodicTableGame {
         this.currentElement = element;
         
         // Update question display
-        if (this.questionTextEl && this.elementPromptEl) {
+        if (this.questionPrefixEl && this.elementPromptEl) {
             switch (this.currentMode) {
                 case 'find-by-name':
-                    this.questionTextEl.textContent = this.i18n.translate('question.find', 'Find the element:') + ' ';
+                    this.questionPrefixEl.textContent = this.i18n.translate('question.find', 'Find the element:') + ' ';
                     this.elementPromptEl.textContent = this.i18n.getElementName(element.symbol) || element.name;
                     break;
                 case 'find-by-symbol':
-                    this.questionTextEl.textContent = this.i18n.translate('question.findSymbol', 'Find the element with symbol:') + ' ';
+                    this.questionPrefixEl.textContent = this.i18n.translate('question.findSymbol', 'Find the element with symbol:') + ' ';
                     this.elementPromptEl.textContent = element.symbol;
                     break;
                 case 'find-by-group':
                     const groupName = this.i18n.translate(`group.${element.group}`) || this._getGroupName(element.group);
-                    this.questionTextEl.textContent = this.i18n.translate('question.findGroup', 'Find an element in group:') + ' ';
+                    this.questionPrefixEl.textContent = this.i18n.translate('question.findGroup', 'Find an element in group:') + ' ';
                     this.elementPromptEl.textContent = `${element.group} (${groupName})`;
                     break;
                 case 'find-by-period':
-                    this.questionTextEl.textContent = this.i18n.translate('question.findPeriod', 'Find an element in period:') + ' ';
+                    this.questionPrefixEl.textContent = this.i18n.translate('question.findPeriod', 'Find an element in period:') + ' ';
                     this.elementPromptEl.textContent = element.period.toString();
                     break;
             }
@@ -573,6 +575,8 @@ class PeriodicTableGame {
         this.table.clearAllHighlights();
         this.table.hideElementInfo();
         
+        // Don't increment question if we're just clearing to show the question
+        // The question is shown when game starts, so next should go to next question
         this.currentQuestion++;
         this._askQuestion();
     }
@@ -653,8 +657,8 @@ class PeriodicTableGame {
         this.table.hideElementInfo();
         
         // Reset question display
-        if (this.questionTextEl) {
-            this.questionTextEl.textContent = '';
+        if (this.questionPrefixEl) {
+            this.questionPrefixEl.textContent = '';
         }
         if (this.elementPromptEl) {
             this.elementPromptEl.textContent = '';

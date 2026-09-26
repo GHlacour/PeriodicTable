@@ -641,8 +641,8 @@ body {
 /* ===== Responsive Design ===== */
 @media (max-width: 1024px) {
     .periodic-table {
-        grid-template-columns: repeat(18, minmax(40px, 1fr));
-        min-width: 750px;
+        grid-template-columns: repeat(18, minmax(32px, 1fr));
+        min-width: 600px;
     }
     
     .element-info-panel {
@@ -681,8 +681,8 @@ body {
     }
     
     .periodic-table {
-        grid-template-columns: repeat(18, minmax(35px, 1fr));
-        min-width: 650px;
+        grid-template-columns: repeat(18, minmax(28px, 1fr));
+        min-width: 520px;
     }
     
     .element-cell .symbol {
@@ -733,8 +733,8 @@ body {
     }
     
     .periodic-table {
-        grid-template-columns: repeat(18, minmax(30px, 1fr));
-        min-width: 560px;
+        grid-template-columns: repeat(18, minmax(26px, 1fr));
+        min-width: 480px;
     }
     
     .modal-content {

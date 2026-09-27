@@ -566,13 +566,48 @@ class PeriodicTable {
             }
         });
         
-        // Prevent touch events from bubbling and potentially causing issues
+        // Touch event handler - handle both touchstart and touchend for better reliability
+        let touchTimeout = null;
+        let touchStartTime = 0;
+        
         this.container.addEventListener('touchstart', (e) => {
-            // Only prevent default if we're handling the click
-            if (e.target.closest('.element-cell')) {
-                e.preventDefault();
+            const cell = e.target.closest('.element-cell');
+            if (cell && cell.dataset.symbol) {
+                touchStartTime = Date.now();
+                // Start a timeout to handle the touch
+                touchTimeout = setTimeout(() => {
+                    const symbol = cell.dataset.symbol;
+                    if (this.onElementClick) {
+                        this.onElementClick(symbol, this.elements[symbol]);
+                    }
+                }, 50); // Short delay to wait for touchend
             }
-        }, { passive: false });
+        }, { passive: true });
+        
+        this.container.addEventListener('touchend', (e) => {
+            const cell = e.target.closest('.element-cell');
+            if (cell && cell.dataset.symbol) {
+                const touchDuration = Date.now() - touchStartTime;
+                // If touch was quick (< 200ms), handle it immediately
+                if (touchDuration < 200) {
+                    if (touchTimeout) {
+                        clearTimeout(touchTimeout);
+                        touchTimeout = null;
+                    }
+                    const symbol = cell.dataset.symbol;
+                    if (this.onElementClick) {
+                        this.onElementClick(symbol, this.elements[symbol]);
+                    }
+                }
+            }
+        }, { passive: true });
+        
+        this.container.addEventListener('touchcancel', (e) => {
+            if (touchTimeout) {
+                clearTimeout(touchTimeout);
+                touchTimeout = null;
+            }
+        }, { passive: true });
         
         // Keyboard navigation
         this.container.addEventListener('keydown', (e) => {

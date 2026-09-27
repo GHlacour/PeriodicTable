@@ -424,6 +424,14 @@ body {
     transition: all var(--transition-fast);
     overflow: hidden;
     color: var(--color-text);
+    /* Ensure touch targets are large enough */
+    min-width: 44px;
+    min-height: 44px;
+    /* Prevent default touch behavior from interfering */
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    /* Ensure touch events are captured */
+    touch-action: manipulation;
 }
 
 .element-cell:hover {
@@ -695,6 +703,12 @@ body {
         min-width: 520px;
     }
     
+    /* Ensure element cells remain touch-friendly on tablets */
+    .element-cell {
+        min-width: 40px;
+        min-height: 40px;
+    }
+    
     .element-cell .symbol {
         font-size: var(--font-size-base);
     }
@@ -763,6 +777,12 @@ body {
     .periodic-table {
         grid-template-columns: repeat(18, minmax(26px, 1fr));
         min-width: 480px;
+    }
+    
+    /* Ensure element cells remain touch-friendly on small phones */
+    .element-cell {
+        min-width: 36px;
+        min-height: 36px;
     }
     
     .modal-content {

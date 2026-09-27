@@ -728,9 +728,14 @@ class PeriodicTableGame {
         DEBUG.trace('handleCorrectAnswer', { symbol, currentScore: this.score });
         
         try {
-            this.score++;
-            DEBUG.info(`Score incremented to: ${this.score}`, null, 'game');
-            this._updateScoreDisplay();
+            // Only increment if score is less than total questions
+            if (this.score < this.totalQuestions) {
+                this.score++;
+                DEBUG.info(`Score incremented to: ${this.score}`, null, 'game');
+                this._updateScoreDisplay();
+            } else {
+                DEBUG.warn(`Score not incremented - already at max (${this.score}/${this.totalQuestions})`, null, 'game');
+            }
             
             // Validate symbol
             DEBUG.assert(symbol, 'No symbol provided');

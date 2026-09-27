@@ -411,6 +411,11 @@ class PeriodicTable {
         if (numberSpan) numberSpan.style.display = 'block';
         
         if (revealName && element) {
+            // Remove any existing name span first
+            const existingNameSpan = cell.querySelector('.name');
+            if (existingNameSpan) {
+                cell.removeChild(existingNameSpan);
+            }
             const nameSpan = document.createElement('span');
             nameSpan.className = 'name';
             nameSpan.textContent = element.name;
@@ -423,6 +428,7 @@ class PeriodicTable {
             nameSpan.style.whiteSpace = 'nowrap';
             nameSpan.style.overflow = 'hidden';
             nameSpan.style.textOverflow = 'ellipsis';
+            nameSpan.style.color = 'black';
             cell.appendChild(nameSpan);
         }
         

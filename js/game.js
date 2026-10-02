@@ -513,7 +513,7 @@ class PeriodicTableGame {
                 switch (this.currentMode) {
                     case 'find-by-name':
                         this.questionTextEl.textContent = this.i18n.translate('question.find', 'Find the element: ') + 
-                            (this.i18n.getElementName(element.symbol) || element.name);
+                            this.i18n.getElementName(element.symbol);
                         break;
                     case 'find-by-symbol':
                         this.questionTextEl.textContent = this.i18n.translate('question.findSymbol', 'Find the element with symbol: ') + element.symbol;
@@ -631,10 +631,16 @@ class PeriodicTableGame {
             
             switch (this.currentMode) {
                 case 'find-by-name':
-                    isCorrect = symbol === this.currentElement.symbol;
+                    // For find-by-name, we need to check if the clicked element's NAME matches the expected name
+                    const clickedElement = this.table.getElementBySymbol(symbol);
+                    const expectedName = this.i18n.getElementName(this.currentElement.symbol);
+                    const clickedName = clickedElement ? this.i18n.getElementName(clickedElement.symbol) : null;
+                    isCorrect = clickedName === expectedName;
                     DEBUG.trace('checkAnswer.findByName', {
                         selected: symbol,
+                        selectedName: clickedName,
                         expected: this.currentElement.symbol,
+                        expectedName: expectedName,
                         isCorrect
                     });
                     break;

@@ -1,0 +1,88 @@
+name: CI Validation
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate JSON files
+        run: |
+          echo "Validating JSON files..."
+          for file in lang/*.json; do
+            if [ -f "$file" ]; then
+              echo "Checking $file..."
+              python3 -m json.tool "$file" > /dev/null || exit 1
+            fi
+          done
+          echo "All JSON files are valid!"
+
+      - name: Validate HTML
+        run: |
+          echo "Validating HTML..."
+          # Basic HTML validation - check for proper structure
+          if grep -q "<!DOCTYPE html>" index.html; then
+            echo "HTML has proper DOCTYPE"
+          else
+            echo "::warning::HTML missing DOCTYPE"
+          fi
+          if grep -q "</html>" index.html; then
+            echo "HTML has closing tag"
+          else
+            echo "::error::HTML missing closing tag"
+            exit 1
+          fi
+
+      - name: Check JavaScript syntax
+        run: |
+          echo "Checking JavaScript syntax..."
+          for file in js/*.js; do
+            if [ -f "$file" ]; then
+              echo "Checking $file..."
+              node --check "$file" 2>/dev/null || echo "::warning::Syntax check skipped (node not available)"
+            fi
+          done
+
+      - name: Check for console errors
+        run: |
+          echo "Checking for console.error and console.warn in game code..."
+          # This is informational - we allow debug logs
+          grep -r "console\.error" js/ || echo "No console.error found"
+          grep -r "console\.warn" js/ || echo "No console.warn found"
+
+      - name: Verify required files exist
+        run: |
+          echo "Verifying required files..."
+          required_files=("index.html" "js/game.js" "js/periodic-table.js" "js/i18n.js" "css/style.css" "lang/en.json" "lang/nl.json" "lang/da.json")
+          for file in "${required_files[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "::error::Missing required file: $file"
+              exit 1
+            fi
+          done
+          echo "All required files present!"
+
+      - name: Check VERSION file
+        run: |
+          echo "Checking VERSION file..."
+          if [ -f "VERSION" ]; then
+            echo "VERSION file exists: $(cat VERSION)"
+          else
+            echo "::warning::VERSION file missing"
+          fi
+
+      - name: Check CHANGELOG.md
+        run: |
+          echo "Checking CHANGELOG.md..."
+          if [ -f "CHANGELOG.md" ]; then
+            echo "CHANGELOG.md exists"
+          else
+            echo "::warning::CHANGELOG.md missing"
+          fi

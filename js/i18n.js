@@ -236,16 +236,6 @@ class I18n {
             modeSymbol.textContent = this.translate('mode.findBySymbol', 'Find by Symbol');
         }
         
-        const modeGroup = document.getElementById('mode-group-text');
-        if (modeGroup) {
-            modeGroup.textContent = this.translate('mode.findByGroup', 'Find by Group');
-        }
-        
-        const modePeriod = document.getElementById('mode-period-text');
-        if (modePeriod) {
-            modePeriod.textContent = this.translate('mode.findByPeriod', 'Find by Period');
-        }
-        
         const modeStudy = document.getElementById('mode-study-text');
         if (modeStudy) {
             modeStudy.textContent = this.translate('mode.study', 'Study Mode');

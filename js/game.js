@@ -290,8 +290,6 @@ class PeriodicTableGame {
             const modeNames = {
                 'find-by-name': this.i18n.translate('mode.findByName', 'Find by Name'),
                 'find-by-symbol': this.i18n.translate('mode.findBySymbol', 'Find by Symbol'),
-                'find-by-group': this.i18n.translate('mode.findByGroup', 'Find by Group'),
-                'find-by-period': this.i18n.translate('mode.findByPeriod', 'Find by Period'),
                 'study': this.i18n.translate('mode.study', 'Study Mode')
             };
             this.modeValueEl.textContent = modeNames[this.currentMode] || this.currentMode;
@@ -472,24 +470,6 @@ class PeriodicTableGame {
                 case 'find-by-symbol':
                     element = this._getRandomElement();
                     break;
-                case 'find-by-group':
-                    // Random group from 1-18
-                    const group = Math.floor(Math.random() * 18) + 1;
-                    element = this.table.getRandomElementFromGroup(group);
-                    if (!element) {
-                        DEBUG.warn(`No element found for group ${group}, falling back to random`, null, 'game');
-                        element = this._getRandomElement();
-                    }
-                    break;
-                case 'find-by-period':
-                    // Random period from 1-7
-                    const period = Math.floor(Math.random() * 7) + 1;
-                    element = this.table.getRandomElementFromPeriod(period);
-                    if (!element) {
-                        DEBUG.warn(`No element found for period ${period}, falling back to random`, null, 'game');
-                        element = this._getRandomElement();
-                    }
-                    break;
                 case 'study':
                     // In study mode, show all symbols and let user explore
                     this.table.showAllSymbols();
@@ -537,14 +517,6 @@ class PeriodicTableGame {
                         break;
                     case 'find-by-symbol':
                         this.questionTextEl.textContent = this.i18n.translate('question.findSymbol', 'Find the element with symbol: ') + element.symbol;
-                        break;
-                    case 'find-by-group':
-                        const groupName = this.i18n.translate(`group.${element.group}`) || this._getGroupName(element.group);
-                        this.questionTextEl.textContent = this.i18n.translate('question.findGroup', 'Find an element in group: ') + 
-                            `${element.group} (${groupName})`;
-                        break;
-                    case 'find-by-period':
-                        this.questionTextEl.textContent = this.i18n.translate('question.findPeriod', 'Find an element in period: ') + element.period;
                         break;
                 }
             } else {
@@ -618,20 +590,6 @@ class PeriodicTableGame {
         }
     }
     
-    _getGroupName(groupNumber) {
-        const groupNames = {
-            1: 'Alkali metals',
-            2: 'Alkaline earth metals',
-            13: 'Boron group',
-            14: 'Carbon group',
-            15: 'Nitrogen group',
-            16: 'Chalcogens',
-            17: 'Halogens',
-            18: 'Noble gases'
-        };
-        return groupNames[groupNumber] || `Group ${groupNumber}`;
-    }
-    
     _handleElementClick(symbol, element) {
         DEBUG.trace('handleElementClick', {
             symbol,
@@ -685,24 +643,6 @@ class PeriodicTableGame {
                     DEBUG.trace('checkAnswer.findBySymbol', {
                         selected: symbol,
                         expected: this.currentElement.symbol,
-                        isCorrect
-                    });
-                    break;
-                case 'find-by-group':
-                    isCorrect = element && element.group === this.currentElement.group;
-                    DEBUG.trace('checkAnswer.findByGroup', {
-                        selected: symbol,
-                        selectedGroup: element ? element.group : null,
-                        expectedGroup: this.currentElement.group,
-                        isCorrect
-                    });
-                    break;
-                case 'find-by-period':
-                    isCorrect = element && element.period === this.currentElement.period;
-                    DEBUG.trace('checkAnswer.findByPeriod', {
-                        selected: symbol,
-                        selectedPeriod: element ? element.period : null,
-                        expectedPeriod: this.currentElement.period,
                         isCorrect
                     });
                     break;
@@ -792,12 +732,6 @@ class PeriodicTableGame {
                     case 'find-by-name':
                     case 'find-by-symbol':
                         message = this.i18n.translate('feedback.incorrect', 'Incorrect. The correct answer is:') + ' ' + correctName + ' (' + correctSymbol + ')';
-                        break;
-                    case 'find-by-group':
-                        message = this.i18n.translate('feedback.incorrectGroup', 'Incorrect. That element is in group:') + ' ' + this._getGroupName(this.currentElement.group);
-                        break;
-                    case 'find-by-period':
-                        message = this.i18n.translate('feedback.incorrectPeriod', 'Incorrect. That element is in period:') + ' ' + this.currentElement.period;
                         break;
                 }
                 

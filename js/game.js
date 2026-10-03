@@ -631,22 +631,11 @@ class PeriodicTableGame {
             
             switch (this.currentMode) {
                 case 'find-by-name':
-                    // For find-by-name, we need to check if the clicked element's NAME matches the expected name
-                    const clickedElement = this.table.getElementBySymbol(symbol);
-                    const expectedName = this.i18n.getElementName(this.currentElement.symbol);
-                    const clickedName = clickedElement ? this.i18n.getElementName(clickedElement.symbol) : null;
-                    isCorrect = clickedName === expectedName;
-                    DEBUG.trace('checkAnswer.findByName', {
-                        selected: symbol,
-                        selectedName: clickedName,
-                        expected: this.currentElement.symbol,
-                        expectedName: expectedName,
-                        isCorrect
-                    });
-                    break;
                 case 'find-by-symbol':
+                    // Both modes check if the clicked symbol matches the expected symbol
+                    // The difference is only in the question display, not the answer checking
                     isCorrect = symbol === this.currentElement.symbol;
-                    DEBUG.trace('checkAnswer.findBySymbol', {
+                    DEBUG.trace('checkAnswer.findByNameOrSymbol', {
                         selected: symbol,
                         expected: this.currentElement.symbol,
                         isCorrect

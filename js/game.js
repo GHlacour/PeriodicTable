@@ -114,10 +114,14 @@ class PeriodicTableGame {
             const modeSelection = document.querySelector('.mode-selection');
             if (modeSelection) {
                 modeSelection.style.display = 'block';
+                modeSelection.style.visibility = 'visible';
+                modeSelection.style.opacity = '1';
             }
             const levelSelection = document.querySelector('.level-selection');
             if (levelSelection) {
                 levelSelection.style.display = 'block';
+                levelSelection.style.visibility = 'visible';
+                levelSelection.style.opacity = '1';
             }
             
             // Hide timer initially

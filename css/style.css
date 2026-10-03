@@ -823,6 +823,12 @@ body {
 }
 
 /* Print styles */
+/* Always show mode and level selection before game starts */
+.mode-selection,
+.level-selection {
+    display: block !important;
+}
+
 @media print {
     body {
         background-color: white;

@@ -741,13 +741,7 @@ body {
     .footer {
         margin-top: var(--spacing-lg);
     }
-    
-    /* Hide mode and level selection on small screens when game is active */
-    .mode-selection,
-    .level-selection {
-        display: none;
-    }
-}
+
 
 @media (max-width: 480px) {
     .container {

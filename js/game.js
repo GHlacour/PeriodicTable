@@ -376,6 +376,16 @@ class PeriodicTableGame {
             // Validate table exists
             DEBUG.assert(this.table, 'Table not initialized');
             
+            // Hide mode and level selection during gameplay
+            const modeSelection = document.querySelector('.mode-selection');
+            if (modeSelection) {
+                modeSelection.style.display = 'none';
+            }
+            const levelSelection = document.querySelector('.level-selection');
+            if (levelSelection) {
+                levelSelection.style.display = 'none';
+            }
+            
             // Hide all elements initially
             this.table.hideAllElements();
             this.table.clearAllHighlights();
@@ -936,6 +946,16 @@ class PeriodicTableGame {
             if (this.startBtn) this.startBtn.disabled = false;
             if (this.nextBtn) this.nextBtn.disabled = true;
             if (this.hintBtn) this.hintBtn.disabled = true;
+            
+            // Show mode and level selection again after game ends
+            const modeSelection = document.querySelector('.mode-selection');
+            if (modeSelection) {
+                modeSelection.style.display = 'block';
+            }
+            const levelSelection = document.querySelector('.level-selection');
+            if (levelSelection) {
+                levelSelection.style.display = 'block';
+            }
             
             DEBUG.info('Game ended successfully', {
                 score: this.score,

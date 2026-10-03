@@ -45,7 +45,7 @@ class PeriodicTableGame {
         DEBUG.assert(this.i18n, 'I18n not initialized');
         DEBUG.assert(this.totalQuestions > 0, 'totalQuestions must be positive');
         
-        // Define level boundaries (atomic numbers)
+        // Define level boundaries (atomic numbers) and custom element sets
         this.levels = {
             'neon': 10,      // Up to Neon (10)
             'argon': 18,     // Up to Argon (18)
@@ -54,6 +54,11 @@ class PeriodicTableGame {
             'radon': 86,     // Up to Radon (86)
             'oganesson': 118, // Up to Oganesson (118)
             'all': 118       // All elements
+        };
+        
+        // Custom element sets (by symbol) - not range-based
+        this.customLevels = {
+            'essentials': ['Al', 'Ba', 'Cd', 'Ca', 'Cr', 'Au', 'Fe', 'K', 'Co', 'Cu', 'Hg', 'Li', 'Pb', 'Mg', 'Mn', 'Na', 'Ni', 'Pt', 'Sn', 'U', 'Ag', 'Zn', 'Ar', 'Br', 'Cl', 'F', 'P', 'He', 'I', 'C', 'Ne', 'Si', 'N', 'H', 'S', 'O']
         };
         
         // Initialize
@@ -133,11 +138,22 @@ class PeriodicTableGame {
             const checkedLevelInput = document.querySelector('input[name="game-level"]:checked');
             if (checkedLevelInput) {
                 this.currentLevel = checkedLevelInput.value;
-                this.maxAtomicNumber = this.levels[this.currentLevel] || 118;
-                DEBUG.info(`Level set to: ${this.currentLevel} (max: ${this.maxAtomicNumber})`, null, 'game');
+                if (this.customLevels[this.currentLevel]) {
+                    // Custom level - use predefined element set
+                    this.currentLevelSymbols = this.customLevels[this.currentLevel];
+                    this.maxAtomicNumber = 118; // Allow all elements, but filter by custom set
+                    DEBUG.info(`Level set to custom: ${this.currentLevel} (${this.currentLevelSymbols.length} elements)`, null, 'game');
+                } else {
+                    // Range-based level
+                    this.currentLevelSymbols = null;
+                    this.maxAtomicNumber = this.levels[this.currentLevel] || 118;
+                    DEBUG.info(`Level set to: ${this.currentLevel} (max: ${this.maxAtomicNumber})`, null, 'game');
+                }
             } else {
-                DEBUG.warn('No level input checked, using default (all)', null, 'game');
-                this.maxAtomicNumber = 118;
+                DEBUG.warn('No level input checked, using default (krypton)', null, 'game');
+                this.currentLevel = 'krypton';
+                this.currentLevelSymbols = null;
+                this.maxAtomicNumber = this.levels[this.currentLevel] || 118;
             }
             
             const checkedModeInput = document.querySelector('input[name="game-mode"]:checked');
@@ -218,7 +234,13 @@ class PeriodicTableGame {
                 input.addEventListener('change', (e) => {
                     DEBUG.trace('change.levelInput');
                     this.currentLevel = e.target.value;
-                    this.maxAtomicNumber = this.levels[this.currentLevel] || 118;
+                    if (this.customLevels[this.currentLevel]) {
+                        this.currentLevelSymbols = this.customLevels[this.currentLevel];
+                        this.maxAtomicNumber = 118;
+                    } else {
+                        this.currentLevelSymbols = null;
+                        this.maxAtomicNumber = this.levels[this.currentLevel] || 118;
+                    }
                     this._updateLevelDisplay();
                 });
             });
@@ -305,7 +327,8 @@ class PeriodicTableGame {
                 'xenon': this.i18n.translate('level.xenon', 'Up to Xenon (1-54)'),
                 'radon': this.i18n.translate('level.radon', 'Up to Radon (1-86)'),
                 'oganesson': this.i18n.translate('level.oganesson', 'Up to Oganesson (1-118)'),
-                'all': this.i18n.translate('level.all', 'All Elements (1-118)')
+                'all': this.i18n.translate('level.all', 'All Elements (1-118)'),
+                'essentials': this.i18n.translate('level.essentials', 'Essentials')
             };
             this.levelValueEl.textContent = levelNames[this.currentLevel] || this.currentLevel;
         }
@@ -547,7 +570,15 @@ class PeriodicTableGame {
                 return null;
             }
             
-            const levelElements = allElements.filter(el => el.number <= this.maxAtomicNumber);
+            // Filter elements based on level type
+            let levelElements = allElements;
+            if (this.currentLevelSymbols) {
+                // Custom level - filter by predefined symbol list
+                levelElements = allElements.filter(el => this.currentLevelSymbols.includes(el.symbol));
+            } else {
+                // Range-based level
+                levelElements = allElements.filter(el => el.number <= this.maxAtomicNumber);
+            }
             
             if (levelElements.length === 0) {
                 DEBUG.error('No elements found for current level', {

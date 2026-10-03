@@ -110,6 +110,16 @@ class PeriodicTableGame {
             this._updateModeDisplay();
             this._updateLevelDisplay();
             
+            // Explicitly ensure mode and level selections are visible
+            const modeSelection = document.querySelector('.mode-selection');
+            if (modeSelection) {
+                modeSelection.style.display = 'block';
+            }
+            const levelSelection = document.querySelector('.level-selection');
+            if (levelSelection) {
+                levelSelection.style.display = 'block';
+            }
+            
             // Hide timer initially
             if (this.timerContainerEl) {
                 this.timerContainerEl.style.display = 'none';

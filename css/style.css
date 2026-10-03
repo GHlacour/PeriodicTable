@@ -248,6 +248,7 @@ body {
     background-color: var(--color-text-light);
     border-radius: var(--border-radius-md);
     box-shadow: var(--shadow-sm);
+    display: block !important;
 }
 
 .mode-selection h2 {
@@ -298,6 +299,7 @@ body {
     border-radius: var(--border-radius-md);
     box-shadow: var(--shadow-sm);
     border-top: 3px solid var(--color-secondary);
+    display: block !important;
 }
 
 .level-selection h2 {

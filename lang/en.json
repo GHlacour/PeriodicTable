@@ -1,5 +1,6 @@
 {
   "translations": {
+    "level.select": "Select Level",
     "game.title": "Periodic Table Game",
     "language.label": "Language:",
     "game.score": "Score:",
@@ -17,6 +18,7 @@
     "mode.studyInstructions": "Click on any element to learn about it. Use the language selector to change language.",
     "level.label": "Level:",
     "level.all": "All Elements (1-118)",
+    "level.essentials": "Essentials",
     "level.neon": "Up to Neon (1-10)",
     "level.argon": "Up to Argon (1-18)",
     "level.krypton": "Up to Krypton (1-36)",

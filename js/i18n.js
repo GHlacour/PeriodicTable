@@ -6,7 +6,8 @@ const I18N_DEBUG = window.debugGame || {
     info: () => {},
     warn: () => {},
     error: () => {},
-    debug: () => {}
+    debug: () => {},
+    trace: () => {}
 };
 
 class I18n {

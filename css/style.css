@@ -248,6 +248,7 @@ body {
     background-color: var(--color-text-light);
     border-radius: var(--border-radius-md);
     box-shadow: var(--shadow-sm);
+    display: block !important;
 }
 
 .mode-selection h2 {
@@ -298,6 +299,7 @@ body {
     border-radius: var(--border-radius-md);
     box-shadow: var(--shadow-sm);
     border-top: 3px solid var(--color-secondary);
+    display: block !important;
 }
 
 .level-selection h2 {
@@ -741,13 +743,7 @@ body {
     .footer {
         margin-top: var(--spacing-lg);
     }
-    
-    /* Hide mode and level selection on small screens when game is active */
-    .mode-selection,
-    .level-selection {
-        display: none;
-    }
-}
+
 
 @media (max-width: 480px) {
     .container {
@@ -827,6 +823,12 @@ body {
 }
 
 /* Print styles */
+/* Always show mode and level selection before game starts */
+.mode-selection,
+.level-selection {
+    display: block !important;
+}
+
 @media print {
     body {
         background-color: white;

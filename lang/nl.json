@@ -1,5 +1,6 @@
 {
   "translations": {
+    "level.select": "Kies Niveau",
     "game.title": "Periodiek Systeem Spel",
     "language.label": "Taal:",
     "game.score": "Score:",
@@ -17,6 +18,7 @@
     "mode.studyInstructions": "Klik op een element om erover te leren. Gebruik de taalselector om de taal te wijzigen.",
     "level.label": "Niveau:",
     "level.all": "Alle Elementen (1-118)",
+    "level.essentials": "Essentiele Elementen",
     "level.neon": "Tot Neon (1-10)",
     "level.argon": "Tot Argon (1-18)",
     "level.krypton": "Tot Krypton (1-36)",

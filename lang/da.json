@@ -1,5 +1,6 @@
 {
   "translations": {
+    "level.select": "V\u00e6lg Niveau",
     "game.title": "Periodiske System Spil",
     "language.label": "Sprog:",
     "game.score": "Score:",
@@ -17,6 +18,7 @@
     "mode.studyInstructions": "Klik på et element for at lære om det. Brug sprogvælgeren til at ændre sprog.",
     "level.label": "Niveau:",
     "level.all": "Alle Elementer (1-118)",
+    "level.essentials": "Essentielle Elementer",
     "level.neon": "Op til Neon (1-10)",
     "level.argon": "Op til Argon (1-18)",
     "level.krypton": "Op til Krypton (1-36)",

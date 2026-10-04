@@ -513,7 +513,7 @@ class PeriodicTableGame {
                 switch (this.currentMode) {
                     case 'find-by-name':
                         this.questionTextEl.textContent = this.i18n.translate('question.find', 'Find the element: ') + 
-                            (this.i18n.getElementName(element.symbol) || element.name);
+                            element.name;
                         break;
                     case 'find-by-symbol':
                         this.questionTextEl.textContent = this.i18n.translate('question.findSymbol', 'Find the element with symbol: ') + element.symbol;

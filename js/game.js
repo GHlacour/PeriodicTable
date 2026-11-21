@@ -110,6 +110,11 @@ class PeriodicTableGame {
                 this.timerContainerEl.style.display = 'none';
             }
             
+            // Hint only works during an active game
+            if (this.hintBtn) {
+                this.hintBtn.disabled = true;
+            }
+            
             // Initialize level and mode from UI
             DEBUG.trace('initialize.fromUI');
             this._initializeFromUI();
@@ -797,25 +802,33 @@ class PeriodicTableGame {
             // Validate symbol
             DEBUG.assert(this.currentElement.symbol, 'No symbol to highlight');
             
-            // Highlight the correct element briefly
-            this.table.highlightElement(this.currentElement.symbol, 'hint');
+            // Highlight three possible locations: the correct element plus
+            // two random decoys from the current level's element set
+            this.table.clearHints();
+            this._getHintSymbols().forEach(sym => this.table.highlightElement(sym, 'hint'));
             
             if (this.feedbackTextEl) {
-                this.feedbackTextEl.textContent = this.i18n.translate('feedback.hint', 'Hint: Element is highlighted!') + ' ' +
+                this.feedbackTextEl.textContent = this.i18n.translate('feedback.hint', 'Hint: 3 possible locations highlighted - one is correct!') + ' ' +
                     (this.i18n.translate('feedback.hintsRemaining', 'Hints remaining:') + ' ' + (3 - this.hintsUsed));
                 this.feedbackTextEl.className = 'feedback hint';
                 DEBUG.trace('showFeedback.hint', { message: this.feedbackTextEl.textContent });
             }
             
-            // Remove highlight after delay
-            setTimeout(() => {
-                this.table.clearHighlight(this.currentElement.symbol, 'hint');
-                DEBUG.trace('clearHintHighlight');
-            }, 2000);
-            
         } catch (error) {
             DEBUG.error('Error in showHint', error, 'game');
         }
+    }
+    
+    _getHintSymbols() {
+        const target = this.currentElement ? this.currentElement.symbol : null;
+        const pool = (window.PERIODIC_TABLE_DATA || [])
+            .filter(el => el.number <= this.maxAtomicNumber && el.symbol !== target);
+        const decoys = [];
+        while (decoys.length < 2 && pool.length > 0) {
+            const index = Math.floor(Math.random() * pool.length);
+            decoys.push(pool.splice(index, 1)[0].symbol);
+        }
+        return target ? [target, ...decoys] : decoys;
     }
     
     nextQuestion() {

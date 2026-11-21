@@ -28,7 +28,7 @@
     "question.findSymbol": "Vind het element met symbool:",
     "feedback.correct": "Goed!",
     "feedback.incorrect": "Fout. Het juiste antwoord is:",
-    "feedback.hint": "Hint: Element is gemarkeerd!",
+    "feedback.hint": "Hint: 3 mogelijke locaties gemarkeerd - een ervan is correct!",
     "feedback.hintsRemaining": "Hints over:",
     "gameOver.title": "Spel Afgelopen",
     "gameOver.score": "Jouw score:",

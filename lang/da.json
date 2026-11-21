@@ -28,7 +28,7 @@
     "question.findSymbol": "Find elementet med symbol:",
     "feedback.correct": "Korrekt!",
     "feedback.incorrect": "Forkert. Det rigtige svar er:",
-    "feedback.hint": "Hint: Element er markeret!",
+    "feedback.hint": "Hint: 3 mulige placeringer fremh\u00e6vet - en af dem er korrekt!",
     "feedback.hintsRemaining": "Hints tilbage:",
     "gameOver.title": "Spil Slut",
     "gameOver.score": "Din score:",

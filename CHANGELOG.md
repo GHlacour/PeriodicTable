@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v1.0.1] - 2026-11-21
+
+### Fixes
+
+- **fix(i18n)**: make language selection work end-to-end - [651d9ed](https://github.com/GHlacour/PeriodicTable/commit/651d9eda9b4dee0eef9ac8409c16840befff928e)
+  - Language dropdown now updates all UI text, including the level selection panel (new `data-i18n` attributes and `level.select` key)
+  - Element names in table cells, aria-labels, and the info panel re-localize when the language changes
+  - Saved language preference persists across reloads (translation loading is awaited before reading localStorage)
+  - Translations fall back to embedded data (`js/lang-data.js`, generated from `lang/*.json`) when `fetch()` is unavailable, e.g. opening `index.html` via `file://`
+  - No longer overwrites the level display with "All Elements" on language change
+  - Added missing `element.group` / `element.period` translations for EN, NL, DA
+  - Added missing `trace()` to the debug fallback in `js/i18n.js` - `setLanguage()` threw before the language-selector listener was attached, so the dropdown never worked (root cause of #2)
+  - Fixed game-over modal always showing "0 out of N": `updateAllTranslations()` rebuilt `final-score-text` via `innerHTML`, detaching the `#final-score` span cached by `game.js`; the text nodes are now updated in place and `_endGame()` looks the spans up fresh
+
+Fixes #2
+
+---
+
 ## [v1.0.0] - 2026-09-27
 
 ### Initial Release

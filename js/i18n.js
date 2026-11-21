@@ -6,7 +6,8 @@ const I18N_DEBUG = window.debugGame || {
     info: () => {},
     warn: () => {},
     error: () => {},
-    debug: () => {}
+    debug: () => {},
+    trace: () => {}
 };
 
 class I18n {
@@ -16,7 +17,7 @@ class I18n {
         this.currentLanguage = 'en';
         this.translations = {};
         this.elementNames = {};
-        this._loadTranslations();
+        this._ready = this._loadTranslations();
     }
     
     async _loadTranslations() {
@@ -26,34 +27,34 @@ class I18n {
         const languages = ['en', 'nl', 'da'];
         
         for (const lang of languages) {
+            const embedded = (window.LANG_DATA && window.LANG_DATA[lang]) || null;
             try {
                 I18N_DEBUG.trace(`Loading translation: ${lang}`, null, 'i18n');
                 const response = await fetch(`lang/${lang}.json`);
-                if (response.ok) {
-                    const data = await response.json();
-                    this.translations[lang] = data.translations || {};
-                    this.elementNames[lang] = data.elementNames || {};
-                    I18N_DEBUG.info(`Loaded translations for ${lang}`, {
-                        translationCount: Object.keys(this.translations[lang]).length,
-                        elementNamesCount: Object.keys(this.elementNames[lang]).length
-                    }, 'i18n');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                const data = await response.json();
+                this.translations[lang] = data.translations || {};
+                this.elementNames[lang] = data.elementNames || {};
+                I18N_DEBUG.info(`Loaded translations for ${lang}`, {
+                    translationCount: Object.keys(this.translations[lang]).length,
+                    elementNamesCount: Object.keys(this.elementNames[lang]).length
+                }, 'i18n');
+            } catch (error) {
+                if (embedded) {
+                    I18N_DEBUG.warn(`fetch failed for ${lang}.json (${error.message}), using embedded translations`, null, 'i18n');
+                    this.translations[lang] = embedded.translations || {};
+                    this.elementNames[lang] = embedded.elementNames || {};
                 } else {
-                    I18N_DEBUG.warn(`Failed to load ${lang}.json: HTTP ${response.status}`, null, 'i18n');
+                    I18N_DEBUG.error(`Failed to load translations for ${lang}`, error, 'i18n');
                     // Fall back to empty object
                     this.translations[lang] = {};
                     this.elementNames[lang] = {};
                 }
-            } catch (error) {
-                I18N_DEBUG.error(`Failed to load translations for ${lang}`, error, 'i18n');
-                // Fall back to empty object
-                this.translations[lang] = {};
-                this.elementNames[lang] = {};
             }
         }
         
-        // Set default language
-        I18N_DEBUG.trace('Setting default language', { lang: this.currentLanguage }, 'i18n');
-        this.setLanguage(this.currentLanguage);
     }
     
     setLanguage(languageCode) {
@@ -156,11 +157,6 @@ class I18n {
         // Update specific known elements
         this._updateKnownElements();
         
-        // Update level display if it exists
-        const levelValue = document.getElementById('level-value');
-        if (levelValue) {
-            levelValue.textContent = this.translate('level.all', 'All Elements (1-118)');
-        }
         const levelLabel = document.getElementById('level-label');
         if (levelLabel) {
             levelLabel.textContent = this.translate('level.label', 'Level:') + ' ';
@@ -249,9 +245,17 @@ class I18n {
         
         const finalScoreText = document.getElementById('final-score-text');
         if (finalScoreText) {
-            // Keep the span structure, just update the text parts
-            const text = this.translate('gameOver.score', 'Your score:');
-            finalScoreText.innerHTML = `${text} <span id="final-score">0</span> ${this.translate('gameOver.of', 'out of')} <span id="final-total">10</span>`;
+            // Update only the surrounding text nodes so the #final-score /
+            // #final-total span elements (cached by game.js) are preserved
+            const scoreText = this.translate('gameOver.score', 'Your score:');
+            const ofText = this.translate('gameOver.of', 'out of');
+            const nodes = finalScoreText.childNodes || [];
+            if (nodes.length >= 3 && nodes[0].nodeType === 3 && nodes[2].nodeType === 3) {
+                nodes[0].textContent = scoreText + ' ';
+                nodes[2].textContent = ' ' + ofText + ' ';
+            } else {
+                finalScoreText.textContent = `${scoreText} 0 ${ofText} 10`;
+            }
         }
         
         const playAgainBtn = document.getElementById('play-again-text');
@@ -308,6 +312,7 @@ class I18n {
     
     // Initialize language from localStorage or browser settings
     async initialize() {
+        await this._ready;
         // Check localStorage for saved preference
         const savedLang = localStorage.getItem('periodicTableLanguage');
         if (savedLang && this.translations[savedLang]) {

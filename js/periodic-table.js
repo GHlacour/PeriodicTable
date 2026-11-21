@@ -213,6 +213,11 @@ class PeriodicTable {
         PT_DEBUG.trace('setupEventListeners', null, 'pt');
         this._setupEventListeners();
         
+        window.addEventListener('languageChanged', () => this._updateLocalizedText());
+        if (window.I18n && window.I18n._ready) {
+            window.I18n._ready.then(() => this._updateLocalizedText());
+        }
+        
         PT_DEBUG.info('PeriodicTable initialized successfully', {
             elementCount: Object.keys(this.elements).length
         }, 'pt');
@@ -381,7 +386,7 @@ class PeriodicTable {
                 if (showNames && element) {
                     const nameSpan = document.createElement('span');
                     nameSpan.className = 'name';
-                    nameSpan.textContent = element.name;
+                    nameSpan.textContent = this._localizedName(element);
                     nameSpan.style.fontSize = '0.6rem';
                     nameSpan.style.position = 'absolute';
                     nameSpan.style.bottom = '2px';
@@ -418,7 +423,7 @@ class PeriodicTable {
             }
             const nameSpan = document.createElement('span');
             nameSpan.className = 'name';
-            nameSpan.textContent = element.name;
+            nameSpan.textContent = this._localizedName(element);
             nameSpan.style.fontSize = '0.6rem';
             nameSpan.style.position = 'absolute';
             nameSpan.style.bottom = '2px';
@@ -557,6 +562,33 @@ class PeriodicTable {
         const infoPanel = document.getElementById('element-info');
         if (infoPanel) {
             infoPanel.style.display = 'none';
+        }
+    }
+    
+    _localizedName(element) {
+        const i18n = window.I18n;
+        if (i18n && element && element.symbol) {
+            return i18n.getElementName(element.symbol) || element.name;
+        }
+        return element ? element.name : '';
+    }
+    
+    _updateLocalizedText() {
+        const cells = this.container.querySelectorAll('.element-cell');
+        cells.forEach(cell => {
+            const symbol = cell.dataset.symbol;
+            if (!symbol) return;
+            const element = this.elements[symbol];
+            if (!element) return;
+            cell.setAttribute('aria-label', `${this._localizedName(element)} (${element.symbol}), atomic number ${element.number}`);
+            const nameSpan = cell.querySelector('.name');
+            if (nameSpan) {
+                nameSpan.textContent = this._localizedName(element);
+            }
+        });
+        const infoPanel = document.getElementById('element-info');
+        if (infoPanel && infoPanel.style.display === 'block' && this.selectedElement) {
+            this._showElementInfo(this.selectedElement);
         }
     }
     

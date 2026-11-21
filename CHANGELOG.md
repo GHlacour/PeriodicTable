@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v1.0.1] - 2026-11-21
+
+### Fixes
+
+- **fix(i18n)**: make language selection work end-to-end - [651d9ed](https://github.com/GHlacour/PeriodicTable/commit/651d9eda9b4dee0eef9ac8409c16840befff928e)
+  - Language dropdown now updates all UI text, including the level selection panel (new `data-i18n` attributes and `level.select` key)
+  - Element names in table cells, aria-labels, and the info panel re-localize when the language changes
+  - Saved language preference persists across reloads (translation loading is awaited before reading localStorage)
+  - Translations fall back to embedded data (`js/lang-data.js`, generated from `lang/*.json`) when `fetch()` is unavailable, e.g. opening `index.html` via `file://`
+  - No longer overwrites the level display with "All Elements" on language change
+  - Added missing `element.group` / `element.period` translations for EN, NL, DA
+
+Fixes #2
+
+---
+
 ## [v1.0.0] - 2026-09-27
 
 ### Initial Release

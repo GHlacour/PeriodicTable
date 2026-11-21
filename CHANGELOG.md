@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Translations fall back to embedded data (`js/lang-data.js`, generated from `lang/*.json`) when `fetch()` is unavailable, e.g. opening `index.html` via `file://`
   - No longer overwrites the level display with "All Elements" on language change
   - Added missing `element.group` / `element.period` translations for EN, NL, DA
+  - Added missing `trace()` to the debug fallback in `js/i18n.js` - `setLanguage()` threw before the language-selector listener was attached, so the dropdown never worked (root cause of #2)
 
 Fixes #2
 

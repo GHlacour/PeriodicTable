@@ -245,9 +245,17 @@ class I18n {
         
         const finalScoreText = document.getElementById('final-score-text');
         if (finalScoreText) {
-            // Keep the span structure, just update the text parts
-            const text = this.translate('gameOver.score', 'Your score:');
-            finalScoreText.innerHTML = `${text} <span id="final-score">0</span> ${this.translate('gameOver.of', 'out of')} <span id="final-total">10</span>`;
+            // Update only the surrounding text nodes so the #final-score /
+            // #final-total span elements (cached by game.js) are preserved
+            const scoreText = this.translate('gameOver.score', 'Your score:');
+            const ofText = this.translate('gameOver.of', 'out of');
+            const nodes = finalScoreText.childNodes || [];
+            if (nodes.length >= 3 && nodes[0].nodeType === 3 && nodes[2].nodeType === 3) {
+                nodes[0].textContent = scoreText + ' ';
+                nodes[2].textContent = ' ' + ofText + ' ';
+            } else {
+                finalScoreText.textContent = `${scoreText} 0 ${ofText} 10`;
+            }
         }
         
         const playAgainBtn = document.getElementById('play-again-text');

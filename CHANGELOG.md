@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - No longer overwrites the level display with "All Elements" on language change
   - Added missing `element.group` / `element.period` translations for EN, NL, DA
   - Added missing `trace()` to the debug fallback in `js/i18n.js` - `setLanguage()` threw before the language-selector listener was attached, so the dropdown never worked (root cause of #2)
+  - Fixed game-over modal always showing "0 out of N": `updateAllTranslations()` rebuilt `final-score-text` via `innerHTML`, detaching the `#final-score` span cached by `game.js`; the text nodes are now updated in place and `_endGame()` looks the spans up fresh
 
 Fixes #2
 

@@ -878,15 +878,18 @@ class PeriodicTableGame {
                 performanceMessage = this.i18n.translate('performance.practice', 'Keep practicing! You will get better with time.');
             }
             
-            // Show game over modal
-            if (this.finalScoreEl) {
-                this.finalScoreEl.textContent = this.score;
+            // Show game over modal (look up spans fresh: they may have been
+            // replaced by an i18n innerHTML update since init)
+            const finalScoreEl = document.getElementById('final-score');
+            if (finalScoreEl) {
+                finalScoreEl.textContent = this.score;
             } else {
                 DEBUG.warn('finalScoreEl not found', null, 'game');
             }
             
-            if (this.finalTotalEl) {
-                this.finalTotalEl.textContent = this.totalQuestions;
+            const finalTotalEl = document.getElementById('final-total');
+            if (finalTotalEl) {
+                finalTotalEl.textContent = this.totalQuestions;
             } else {
                 DEBUG.warn('finalTotalEl not found', null, 'game');
             }

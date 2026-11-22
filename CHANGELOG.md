@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v1.2.0] - 2026-11-22
+
+### Features
+
+- **feat(ui)**: show the app version in the footer - issue #18
+  - New generated `js/version.js` exposes `window.APP_VERSION` from the `VERSION` file (works via file:// and on PR previews, no fetch needed)
+  - Footer renders it as small muted text (`#app-version` in index.html, `.app-version` in css/style.css, wired in js/game.js)
+  - AGENTS.md release procedure now regenerates `js/version.js` together with VERSION/CHANGELOG
+
+Closes #18
+
+---
+
 ## [v1.1.1] - 2026-11-22
 
 ### Fixes

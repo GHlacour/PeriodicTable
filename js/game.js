@@ -223,6 +223,13 @@ class PeriodicTableGame {
                     DEBUG.trace('change.modeInput');
                     this.currentMode = e.target.value;
                     this._updateModeDisplay();
+                    if (!this.gameActive) {
+                        if (this.currentMode === 'study') {
+                            this.table.showAllSymbols();
+                        } else {
+                            this.table.hideAllElements();
+                        }
+                    }
                 });
             });
             
@@ -622,6 +629,17 @@ class PeriodicTableGame {
         });
         
         try {
+            // In study mode, just show info - no game state needed
+            if (this.currentMode === 'study') {
+                if (!symbol) {
+                    DEBUG.warn('No symbol provided in click', null, 'game');
+                    return;
+                }
+                DEBUG.trace('studyMode.click', { symbol });
+                this.table.selectElement(symbol, true);
+                return;
+            }
+            
             if (!this.gameActive) {
                 DEBUG.info('Game not active, ignoring click', { symbol }, 'game');
                 return;
@@ -635,13 +653,6 @@ class PeriodicTableGame {
             // Validate symbol
             if (!symbol) {
                 DEBUG.warn('No symbol provided in click', null, 'game');
-                return;
-            }
-            
-            // In study mode, just show info
-            if (this.currentMode === 'study') {
-                DEBUG.trace('studyMode.click', { symbol });
-                this.table.selectElement(symbol, true);
                 return;
             }
             

@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v1.1.1] - 2026-11-22
+
+### Fixes
+
+- **fix(game)**: make Study Mode clicks open the element info panel - [f017026](https://github.com/GHlacour/PeriodicTable/commit/f017026)
+  - The study-mode branch in `_handleElementClick` now runs before the `gameActive`/`currentElement` guards (study mode never sets a current question, so clicks were always ignored)
+  - Selecting study mode while no game is active reveals all symbols; switching back hides them
+  - Game modes unchanged
+
+Closes #16
+
+---
+
 ## [v1.1.0] - 2026-11-22
 
 ### Features
@@ -18,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added `level.essentials` translations for EN, NL, DA
 
 Closes #10
+
 
 ---
 

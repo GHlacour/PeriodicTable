@@ -56,6 +56,13 @@ class PeriodicTableGame {
             'all': 118       // All elements
         };
         
+        this.ESSENTIAL_ELEMENTS = new Set([
+            'H','He','Li','C','N','O','F','Ne','Na','Mg',
+            'Al','Si','P','S','Cl','Ar','K','Ca','Cr','Mn',
+            'Fe','Co','Ni','Cu','Zn','Br','Ag','Cd','Sn','I',
+            'Ba','Pt','Au','Hg','Pb','U'
+        ]);
+        
         // Initialize
         this._initialize();
     }
@@ -156,6 +163,8 @@ class PeriodicTableGame {
             // Validate settings
             DEBUG.assert(this.maxAtomicNumber >= 1 && this.maxAtomicNumber <= 118, 
                 `Invalid maxAtomicNumber: ${this.maxAtomicNumber}`);
+            
+            this._updateLevelDisplay();
             
         } catch (error) {
             DEBUG.error('Error in _initializeFromUI', error, 'game');
@@ -304,6 +313,7 @@ class PeriodicTableGame {
     _updateLevelDisplay() {
         if (this.levelValueEl) {
             const levelNames = {
+                'essentials': this.i18n.translate('level.essentials', 'Essentials (36 common elements)'),
                 'neon': this.i18n.translate('level.neon', 'Up to Neon (1-10)'),
                 'argon': this.i18n.translate('level.argon', 'Up to Argon (1-18)'),
                 'krypton': this.i18n.translate('level.krypton', 'Up to Krypton (1-36)'),
@@ -537,6 +547,14 @@ class PeriodicTableGame {
         }
     }
     
+    _getLevelElements() {
+        const allElements = window.PERIODIC_TABLE_DATA || [];
+        if (this.currentLevel === 'essentials') {
+            return allElements.filter(el => this.ESSENTIAL_ELEMENTS.has(el.symbol));
+        }
+        return allElements.filter(el => el.number <= this.maxAtomicNumber);
+    }
+    
     _getRandomElement() {
         DEBUG.trace('getRandomElement', {
             maxAtomicNumber: this.maxAtomicNumber,
@@ -552,7 +570,7 @@ class PeriodicTableGame {
                 return null;
             }
             
-            const levelElements = allElements.filter(el => el.number <= this.maxAtomicNumber);
+            const levelElements = this._getLevelElements();
             
             if (levelElements.length === 0) {
                 DEBUG.error('No elements found for current level', {
@@ -821,8 +839,7 @@ class PeriodicTableGame {
     
     _getHintSymbols() {
         const target = this.currentElement ? this.currentElement.symbol : null;
-        const pool = (window.PERIODIC_TABLE_DATA || [])
-            .filter(el => el.number <= this.maxAtomicNumber && el.symbol !== target);
+        const pool = this._getLevelElements().filter(el => el.symbol !== target);
         const decoys = [];
         while (decoys.length < 2 && pool.length > 0) {
             const index = Math.floor(Math.random() * pool.length);

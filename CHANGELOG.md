@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v1.1.0] - 2026-11-22
+
+### Features
+
+- **feat(game)**: add Essentials level as the default - [9871071](https://github.com/GHlacour/PeriodicTable/commit/9871071b5155211f9e948e421487f6460c569aac)
+  - New `essentials` level with the fixed 36-element set from issue #10, selected by default in the level picker
+  - Question targets and hint decoys are drawn from the essential set (shared `_getLevelElements()`); all existing levels unchanged
+  - Level display is initialized from the selected radio at boot
+  - Added `level.essentials` translations for EN, NL, DA
+
+Closes #10
+
+---
+
 ## [v1.0.2] - 2026-11-21
 
 ### Fixes

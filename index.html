@@ -36,7 +36,7 @@
             </div>
             <div class="level-display">
                 <span id="level-label">Level:</span>
-                <span id="level-value">All Elements</span>
+                <span id="level-value">Essentials (36 common elements)</span>
             </div>
             <div class="timer-display" id="timer-container" style="display: none;">
                 <span id="timer-label">Time:</span>
@@ -85,7 +85,11 @@
             <h2 id="select-level-title" data-i18n="level.select">Select Level</h2>
             <div class="level-options">
                 <label class="level-option">
-                    <input type="radio" name="game-level" value="krypton" checked>
+                    <input type="radio" name="game-level" value="essentials" checked>
+                    <span id="level-essentials-text" data-i18n="level.essentials">Essentials (36 common elements)</span>
+                </label>
+                <label class="level-option">
+                    <input type="radio" name="game-level" value="krypton">
                     <span id="level-krypton-text" data-i18n="level.krypton">Up to Krypton (1-36)</span>
                 </label>
                 <label class="level-option">
@@ -95,10 +99,6 @@
                 <label class="level-option">
                     <input type="radio" name="game-level" value="argon">
                     <span id="level-argon-text" data-i18n="level.argon">Up to Argon (1-18)</span>
-                </label>
-                <label class="level-option">
-                    <input type="radio" name="game-level" value="krypton">
-                    <span id="level-krypton-text" data-i18n="level.krypton">Up to Krypton (1-36)</span>
                 </label>
                 <label class="level-option">
                     <input type="radio" name="game-level" value="xenon">

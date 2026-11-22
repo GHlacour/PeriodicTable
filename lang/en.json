@@ -17,6 +17,7 @@
     "mode.studyInstructions": "Click on any element to learn about it. Use the language selector to change language.",
     "level.label": "Level:",
     "level.select": "Select Level",
+    "level.essentials": "Essentials (36 common elements)",
     "level.all": "All Elements (1-118)",
     "level.neon": "Up to Neon (1-10)",
     "level.argon": "Up to Argon (1-18)",

@@ -504,6 +504,13 @@ class PeriodicTable {
         });
     }
     
+    clearHints() {
+        const cells = this.container.querySelectorAll('.element-cell.hint');
+        cells.forEach(cell => {
+            cell.classList.remove('hint');
+        });
+    }
+    
     selectElement(symbol, showInfo = true) {
         this.clearAllHighlights();
         this.selectedElement = symbol;

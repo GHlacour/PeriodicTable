@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v1.0.2] - 2026-11-21
+
+### Fixes
+
+- **fix(game)**: make the Hint button useful - [231cc77](https://github.com/GHlacour/PeriodicTable/commit/231cc779c873e61368f2b5f25b2f2f210e83fd82)
+  - Hint now highlights 3 possible locations: the correct element plus 2 random decoys from the current level's element set, persisting until the question is answered (previously a 2s flash on an empty cell)
+  - Repeated hints replace the previous highlight set; 3-hint limit kept
+  - Hint button disabled outside an active game (e.g. study mode)
+  - Updated `feedback.hint` text in EN, NL, DA
+
+Fixes #13
+
+---
+
 ## [v1.0.1] - 2026-11-21
 
 ### Fixes

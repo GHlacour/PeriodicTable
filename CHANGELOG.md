@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v1.3.0] - 2026-11-22
+
+### Features
+
+- **feat(game)**: in Study Mode, show only the selected level's elements - issue #19
+  - In-set cells show symbol/number; out-of-set cells are dimmed (`.element-cell.dimmed`) with hidden symbols but stay clickable, so the info pop-up still opens for any element
+  - Mode/level changes update the table live when no game is active; starting a game in study mode keeps the level filter
+  - Game modes and hints unchanged
+
+Closes #19
+
+---
+
 ## [v1.2.0] - 2026-11-22
 
 ### Features

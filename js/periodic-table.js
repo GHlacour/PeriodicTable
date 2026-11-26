@@ -465,6 +465,7 @@ class PeriodicTable {
             if (symbolSpan) symbolSpan.style.display = 'none';
             if (numberSpan) numberSpan.style.display = 'none';
             if (nameSpan) cell.removeChild(nameSpan);
+            cell.classList.remove('dimmed');
         });
     }
     
@@ -476,6 +477,25 @@ class PeriodicTable {
             
             if (symbolSpan) symbolSpan.style.display = 'block';
             if (numberSpan) numberSpan.style.display = 'block';
+        });
+    }
+    
+    showLevelElements(levelSymbols) {
+        const cells = this.container.querySelectorAll('.element-cell');
+        cells.forEach(cell => {
+            const symbolSpan = cell.querySelector('.symbol');
+            const numberSpan = cell.querySelector('.number');
+            const hasSymbol = !!cell.dataset.symbol;
+            const inSet = hasSymbol && levelSymbols.has(cell.dataset.symbol);
+            
+            if (symbolSpan) symbolSpan.style.display = inSet ? 'block' : 'none';
+            if (numberSpan) numberSpan.style.display = inSet ? 'block' : 'none';
+            
+            if (hasSymbol && !inSet) {
+                cell.classList.add('dimmed');
+            } else {
+                cell.classList.remove('dimmed');
+            }
         });
     }
     

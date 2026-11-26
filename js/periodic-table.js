@@ -351,6 +351,14 @@ class PeriodicTable {
             cell.classList.add('empty');
             cell.setAttribute('role', 'gridcell');
             cell.setAttribute('aria-hidden', 'true');
+            
+            // Label the pulled-out f-block rows (standard: 57-71 lanthanides, 89-103 actinides)
+            if (x === 2 && (y === 8 || y === 9)) {
+                const rangeLabel = document.createElement('span');
+                rangeLabel.className = 'fblock-label';
+                rangeLabel.textContent = y === 8 ? '57\u201371' : '89\u2013103';
+                cell.appendChild(rangeLabel);
+            }
         }
         
         return cell;

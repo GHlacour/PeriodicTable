@@ -230,11 +230,7 @@ class PeriodicTableGame {
                     this.currentMode = e.target.value;
                     this._updateModeDisplay();
                     if (!this.gameActive) {
-                        if (this.currentMode === 'study') {
-                            this.table.showAllSymbols();
-                        } else {
-                            this.table.hideAllElements();
-                        }
+                        this._applyModeTableVisibility();
                     }
                 });
             });
@@ -247,6 +243,9 @@ class PeriodicTableGame {
                     this.currentLevel = e.target.value;
                     this.maxAtomicNumber = this.levels[this.currentLevel] || 118;
                     this._updateLevelDisplay();
+                    if (!this.gameActive) {
+                        this._applyModeTableVisibility();
+                    }
                 });
             });
             
@@ -320,6 +319,14 @@ class PeriodicTableGame {
                 'study': this.i18n.translate('mode.study', 'Study Mode')
             };
             this.modeValueEl.textContent = modeNames[this.currentMode] || this.currentMode;
+        }
+    }
+    
+    _applyModeTableVisibility() {
+        if (this.currentMode === 'study') {
+            this.table.showLevelElements(new Set(this._getLevelElements().map(el => el.symbol)));
+        } else {
+            this.table.hideAllElements();
         }
     }
     
@@ -499,8 +506,8 @@ class PeriodicTableGame {
                     element = this._getRandomElement();
                     break;
                 case 'study':
-                    // In study mode, show all symbols and let user explore
-                    this.table.showAllSymbols();
+                    // In study mode, show the level's elements and let user explore
+                    this._applyModeTableVisibility();
                     if (this.questionTextEl) {
                         this.questionTextEl.textContent = this.i18n.translate('mode.studyInstructions', 'Click on any element to learn about it. Use the language selector to change language.');
                     }
@@ -979,6 +986,7 @@ class PeriodicTableGame {
             this.gameActive = false;
             this._stopTimer();
             this._clearFeedback();
+            this._applyModeTableVisibility();
             
             // Hide modals
             if (this.gameOverModal) {

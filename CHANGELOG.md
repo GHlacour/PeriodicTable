@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v1.3.1] - 2026-11-26
+
+### Fixes
+
+- **fix(ui)**: keep table row/column labels inside the grid - issue #22
+  - `.period-label`/`.group-label` were `position: absolute` without a positioned container, so they piled up at the top of the page (the reported "black spot"); they are now in-flow grid items at their inline grid positions, and `.periodic-table` gets `position: relative`
+
+Closes #22
+
+---
+
 ## [v1.3.0] - 2026-11-22
 
 ### Features

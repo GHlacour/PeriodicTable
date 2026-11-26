@@ -656,6 +656,11 @@ body {
     margin-bottom: var(--spacing-xs);
 }
 
+.app-version {
+    font-size: var(--font-size-xs);
+    opacity: 0.6;
+}
+
 /* ===== Responsive Design ===== */
 @media (max-width: 1024px) {
     .periodic-table {

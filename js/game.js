@@ -122,6 +122,12 @@ class PeriodicTableGame {
                 this.hintBtn.disabled = true;
             }
             
+            // Show app version in the footer (window.APP_VERSION from js/version.js)
+            const versionEl = document.getElementById('app-version');
+            if (versionEl) {
+                versionEl.textContent = window.APP_VERSION || '';
+            }
+            
             // Initialize level and mode from UI
             DEBUG.trace('initialize.fromUI');
             this._initializeFromUI();

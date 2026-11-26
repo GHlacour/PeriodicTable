@@ -42,6 +42,9 @@ git commit -m "feat: add new game mode"
 # Update version (example: from v1.0.0 to v1.1.0 for new feature)
 # Edit VERSION file or package.json
 
+# Regenerate the embedded version shown in the UI footer (js/version.js)
+printf 'window.APP_VERSION = "%s";\n' "$(cat VERSION)" > js/version.js
+
 # Tag the release
 git tag -a v1.1.0 -m "Release v1.1.0: Add timed challenge mode"
 git push origin main --tags

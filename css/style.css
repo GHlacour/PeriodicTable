@@ -402,13 +402,13 @@ body {
 .periodic-table {
     position: relative;
     display: grid;
-    grid-template-columns: repeat(18, minmax(45px, 1fr));
-    grid-template-rows: repeat(10, minmax(45px, 1fr));
+    grid-template-columns: repeat(19, minmax(45px, 1fr));
+    grid-template-rows: repeat(11, minmax(45px, 1fr));
     gap: 1px;
     background-color: var(--color-border);
     padding: 1px;
     border-radius: var(--border-radius-sm);
-    min-width: 850px;
+    min-width: 900px;
 }
 
 /* Individual element cells */
@@ -666,8 +666,8 @@ body {
 /* ===== Responsive Design ===== */
 @media (max-width: 1024px) {
     .periodic-table {
-        grid-template-columns: repeat(18, minmax(32px, 1fr));
-        min-width: 600px;
+        grid-template-columns: repeat(19, minmax(32px, 1fr));
+        min-width: 640px;
     }
     
     .element-info-panel {
@@ -706,8 +706,8 @@ body {
     }
     
     .periodic-table {
-        grid-template-columns: repeat(18, minmax(28px, 1fr));
-        min-width: 520px;
+        grid-template-columns: repeat(19, minmax(28px, 1fr));
+        min-width: 560px;
     }
     
     /* Ensure element cells remain touch-friendly on tablets */
@@ -782,8 +782,8 @@ body {
     }
     
     .periodic-table {
-        grid-template-columns: repeat(18, minmax(26px, 1fr));
-        min-width: 480px;
+        grid-template-columns: repeat(19, minmax(26px, 1fr));
+        min-width: 520px;
     }
     
     /* Ensure element cells remain touch-friendly on small phones */

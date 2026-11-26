@@ -294,29 +294,27 @@ class PeriodicTable {
     }
     
     _createLabels() {
-        // Create period labels (left side)
+        // Create period labels (dedicated left column, aligned with element rows)
         for (let y = 0; y < 7; y++) {
             const label = document.createElement('div');
             label.className = 'period-label';
             label.textContent = y + 1;
             label.style.gridColumn = '1';
-            label.style.gridRow = y + 1;
+            label.style.gridRow = y + 2;
             label.style.justifySelf = 'start';
             this.container.appendChild(label);
         }
         
-        // Create group labels (top)
-        const groupLabels = [1, 2, null, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
+        // Create group labels (dedicated top row; element x is group-1, so
+        // group n sits in column n+1, cells start at column 2)
         for (let x = 0; x < 18; x++) {
-            if (groupLabels[x] !== null) {
-                const label = document.createElement('div');
-                label.className = 'group-label';
-                label.textContent = groupLabels[x];
-                label.style.gridColumn = x + 1;
-                label.style.gridRow = '1';
-                label.style.alignSelf = 'start';
-                this.container.appendChild(label);
-            }
+            const label = document.createElement('div');
+            label.className = 'group-label';
+            label.textContent = x + 1;
+            label.style.gridColumn = x + 2;
+            label.style.gridRow = '1';
+            label.style.alignSelf = 'start';
+            this.container.appendChild(label);
         }
     }
     
@@ -330,8 +328,8 @@ class PeriodicTable {
         cell.tabIndex = element ? 0 : -1;
         
         // Set grid position
-        cell.style.gridColumn = x + 1;
-        cell.style.gridRow = y + 2; // +2 to account for labels
+        cell.style.gridColumn = x + 2; // +2: column 1 is the period-label column
+        cell.style.gridRow = y + 2; // +2: row 1 is the group-label row
         
         if (element) {
             cell.classList.add(element.category);

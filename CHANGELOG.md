@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v1.3.2] - 2026-11-26
+
+### Fixes
+
+- **fix(ui)**: align table labels with dedicated grid row/column (issue #22 follow-up) - [7a40097](https://github.com/GHlacour/PeriodicTable/commit/7a40097)
+  - Group labels 1-18 now in row 1 at columns 2-19 (previously shifted: "3" appeared above group 4 and "18" fell off the grid)
+  - Period labels 1-7 in column 1 at rows 2-8 (previously overlapped/hidden behind the first element column)
+  - Grid is 19 columns x 11 rows; element cells shifted to column x+2 / row y+2
+
+Closes #22
+
+---
+
+## [v1.3.1] - 2026-11-26
+
+### Fixes
+
+- **fix(ui)**: keep table row/column labels inside the grid - issue #22
+  - `.period-label`/`.group-label` were `position: absolute` without a positioned container, so they piled up at the top of the page (the reported "black spot"); they are now in-flow grid items at their inline grid positions, and `.periodic-table` gets `position: relative`
+
+Closes #22
+
+---
+
 ## [v1.3.0] - 2026-11-22
 
 ### Features

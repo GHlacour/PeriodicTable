@@ -400,6 +400,7 @@ body {
 }
 
 .periodic-table {
+    position: relative;
     display: grid;
     grid-template-columns: repeat(18, minmax(45px, 1fr));
     grid-template-rows: repeat(10, minmax(45px, 1fr));
@@ -524,28 +525,24 @@ body {
     50% { box-shadow: 0 0 0 10px rgba(243, 156, 18, 0); }
 }
 
-/* Period and group labels */
+/* Period and group labels - in-flow grid items placed via inline
+   gridColumn/gridRow in js/periodic-table.js (_createLabels) */
 .period-label, .group-label {
-    position: absolute;
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-bold);
     color: var(--color-text);
     opacity: 0.7;
     pointer-events: none;
-    z-index: var(--z-background);
 }
 
 .period-label {
-    left: 2px;
-    top: 50%;
-    transform: translateY(-50%) rotate(-90deg);
-    transform-origin: left center;
+    align-self: center;
+    justify-self: start;
 }
 
 .group-label {
-    top: 2px;
-    left: 50%;
-    transform: translateX(-50%);
+    align-self: start;
+    justify-self: center;
 }
 
 /* ===== Element Info Panel ===== */

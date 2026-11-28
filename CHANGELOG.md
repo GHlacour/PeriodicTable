@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v1.4.1] - 2026-11-26
+
+### Fixes
+
+- **fix(i18n)**: localize the element name in the find-by-name question - issue #26
+  - The question used the English `element.name` (e.g. NL "Vind het element: Sodium"); it now uses `i18n.getElementName(symbol)` with English fallback, so NL/DA questions are fully localized (e.g. "Natrium", "Kvælstof")
+
+Closes #26
+
+---
+
 ## [v1.4.0] - 2026-11-26
 
 ### Features
